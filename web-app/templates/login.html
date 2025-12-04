@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AI Voice Diary - Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="login-body">
+    <main class="login-container">
+        <h1 class="app-title">AI Voice Diary</h1>
+
+        {% if error %}
+            <p class="error-msg">{{ error }}</p>
+        {% endif %}
+
+        <form method="post" action="{{ url_for('login') }}" class="login-form">
+            <label>
+                Username
+                <input type="text" name="username" value="{{ username or '' }}" required>
+            </label>
+
+            <label>
+                Password
+                <input type="password" name="password" required>
+            </label>
+
+            <button type="submit" class="primary-btn">Log in / Sign up</button>
+
+            <p class="hint">
+                For this course project, a new username will be created automatically
+                if it doesn’t exist yet.
+            </p>
+        </form>
+    </main>
+    <script src="/static/login.js"></script>
+</body>
+
+</html>
