@@ -196,3 +196,45 @@ h2 {
     gap: 10px;
 }
 
+.diary-date-header {
+    margin-top: 12px;
+    font-weight: 600;
+    font-size: 14px;
+    color: #7a7a7a;
+}
+
+.diary-item {
+    padding: 6px 0 6px 16px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.diary-item:hover {
+    background-color: #f5f5f5;
+}
+
+#diary-content,
+#diary-content-chat {
+    white-space: pre-wrap;
+}
+.diary-detail {
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100vh - 180px);
+}
+
+#diary-content {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    margin-bottom: 12px;
+}
+
+.diary-actions {
+    flex-shrink: 0;
+    padding-top: 8px;
+    background: #fff; 
+}
+
+.hidden {
+    display: none !important;
+}

@@ -1,69 +1,100 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>AI Voice Diary - Home</title>
+    <meta charset="UTF-8" />
+    <title>AI Voice Diary</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <main class="container main-page">
-        <header class="top-bar">
-            <div>
-                <h2>Hi, {{ username }}</h2>
-                <p class="subtitle">Tell me about your day.</p>
-            </div>
-        </header>
+<div class="app-root">
+    <header class="app-header">
+        <div class="app-title">AI Voice Diary</div>
+        <div class="app-user">Hi, {{ username }}</div>
+    </header>
 
-        <!-- Chat / Recording Section -->
-        <section class="conversation-section page-section" id="section-chat">
-            <h3>Today&apos;s Conversation</h3>
-
-            <button id="start-conv-btn">Start New Conversation</button>
-
-            <div class="record-controls">
-                <button id="record-btn" disabled>🎙 Start Recording</button>
-                <button id="stop-btn" disabled>⏹ Stop</button>
+    <main class="app-main">
+        <!-- Chat / recording -->
+        <section class="page-section" id="section-chat">
+            <div class="chat-header">
+                <h3>Today's Conversation</h3>
+                <button id="start-conversation-btn">Start New Conversation</button>
             </div>
 
-            <div id="conversation-log" class="conversation-log"></div>
+            <div class="chat-layout">
+                <div class="chat-left">
+                    <div id="conversation" class="conversation-box"></div>
 
-            <button id="complete-btn" disabled>✅ Finish & Generate Diary</button>
-            <p id="conversation-status"></p>
+                    <div class="record-controls">
+                        <button id="start-recording-btn" disabled>🎙 Start</button>
+                        <button id="stop-recording-btn" disabled>⏹ Stop</button>
+                        <button id="finish-conversation-btn" disabled>Finish &amp; Generate Diary</button>
+                    </div>
+
+                    <div id="conversation-status" class="status-text">
+                        Ready.
+                    </div>
+                </div>
+
+                <div class="chat-right">
+                    <h4>Today&apos;s Diary (preview)</h4>
+                    <article id="diary-detail-chat" class="diary-preview">
+                        <h5 id="diary-title-chat"></h5>
+                        <p id="diary-date-chat"></p>
+                        <p id="diary-mood-chat"></p>
+                        <p id="diary-content-chat"></p>
+                    </article>
+                </div>
+            </div>
         </section>
 
-        <!-- Diaries Section -->
-        <section class="diary-section page-section hidden" id="section-diaries">
+        <!-- My diaries -->
+        <section class="page-section hidden" id="section-diaries">
             <h3>My Diaries</h3>
+
+            <div class="diary-search">
+                <input id="diary-search-input" placeholder="Search by keyword..." />
+                <button id="diary-search-btn">Search</button>
+                <button id="diary-search-clear-btn">Clear</button>
+            </div>
+
             <button id="load-diaries-btn">Reload Diaries</button>
+
             <div class="diary-layout">
                 <ul id="diary-list"></ul>
+
                 <article id="diary-detail" class="diary-detail">
                     <h4 id="diary-title"></h4>
                     <p id="diary-date"></p>
+                    <p id="diary-time"></p> 
+                    <p id="diary-mood"></p>
                     <p id="diary-content"></p>
+
+                    <div class="diary-actions hidden">
+                        <button id="diary-edit-btn">Edit</button>
+                        <button id="diary-delete-btn">Delete</button>
+                    </div>
                 </article>
             </div>
-        </section>        
+        </section>
 
-        <!-- Settings Section -->
+        <!-- Settings -->
         <section class="page-section hidden" id="section-settings">
             <h3>Settings</h3>
-            <p>(You can leave this simple for now: maybe show username, a logout button later.)</p>
+            <p>Logged in as: {{ username }}</p>
+            <button onclick="logout()">Logout</button>
         </section>
     </main>
 
     <nav class="bottom-nav">
-        <button data-target="section-chat" class="nav-btn active">Chat</button>
-        <button data-target="section-diaries" class="nav-btn">My Diaries</button>
-        <button data-target="section-settings" class="nav-btn">Settings</button>
+        <button class="nav-btn active" data-target="section-chat">Chat</button>
+        <button class="nav-btn" data-target="section-diaries">My Diaries</button>
+        <button class="nav-btn" data-target="section-settings">Settings</button>
     </nav>
+</div>
 
-    <button onclick="logout()">Logout</button>
-
-    <script>
-        window.CURRENT_USER_ID = "{{ user_id }}";
-        window.CURRENT_USERNAME = "{{ username }}";
-    </script>
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
+<script>
+    const currentUserId = "{{ user_id }}";
+</script>
+<script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>
