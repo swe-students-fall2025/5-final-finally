@@ -1,0 +1,22 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+flask = "*"
+pymongo = "*"
+coverage = "*"
+pytest = "*"
+pytest-flask = "*"
+black = "*"
+pylint = "*"
+colorama = "*"
+
+[dev-packages]
+black = "*"
+pylint = "*"
+pytest-cov = "*"
+
+[requires]
+python_version = "3.10"
