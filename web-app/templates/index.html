@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AI Voice Diary - Home</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <main class="container main-page">
+        <header class="top-bar">
+            <div>
+                <h2>Hi, {{ username }}</h2>
+                <p class="subtitle">Tell me about your day.</p>
+            </div>
+        </header>
+
+        <!-- Chat / Recording Section -->
+        <section class="conversation-section page-section" id="section-chat">
+            <h3>Today&apos;s Conversation</h3>
+
+            <button id="start-conv-btn">Start New Conversation</button>
+
+            <div class="record-controls">
+                <button id="record-btn" disabled>🎙 Start Recording</button>
+                <button id="stop-btn" disabled>⏹ Stop</button>
+            </div>
+
+            <div id="conversation-log" class="conversation-log"></div>
+
+            <button id="complete-btn" disabled>✅ Finish & Generate Diary</button>
+            <p id="conversation-status"></p>
+        </section>
+
+        <!-- Diaries Section -->
+        <section class="diary-section page-section hidden" id="section-diaries">
+            <h3>My Diaries</h3>
+            <button id="load-diaries-btn">Reload Diaries</button>
+            <div class="diary-layout">
+                <ul id="diary-list"></ul>
+                <article id="diary-detail" class="diary-detail">
+                    <h4 id="diary-title"></h4>
+                    <p id="diary-date"></p>
+                    <p id="diary-content"></p>
+                </article>
+            </div>
+        </section>        
+
+        <!-- Settings Section -->
+        <section class="page-section hidden" id="section-settings">
+            <h3>Settings</h3>
+            <p>(You can leave this simple for now: maybe show username, a logout button later.)</p>
+        </section>
+    </main>
+
+    <nav class="bottom-nav">
+        <button data-target="section-chat" class="nav-btn active">Chat</button>
+        <button data-target="section-diaries" class="nav-btn">My Diaries</button>
+        <button data-target="section-settings" class="nav-btn">Settings</button>
+    </nav>
+
+    <button onclick="logout()">Logout</button>
+
+    <script>
+        window.CURRENT_USER_ID = "{{ user_id }}";
+        window.CURRENT_USERNAME = "{{ username }}";
+    </script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
