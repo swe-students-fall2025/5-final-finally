@@ -1,3 +1,6 @@
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning, module='multiprocessing.resource_tracker')
+
 import os
 import tempfile
 from pathlib import Path
