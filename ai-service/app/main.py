@@ -7,12 +7,13 @@ from fastapi import FastAPI, UploadFile, File, HTTPException, Query
 from pydantic import BaseModel
 
 # Assuming these modules exist and are correct
-from app.db import create_or_get_conversation, append_message, conversations 
+from app.db import create_or_get_conversation, append_message, conversations
 from app.services.stt_service import transcribe_audio
-from .gemini_client import generate_cheerful_reply
+from .gemini_client import generate_cheerful_reply, generate_diary
 
 
 # ========= Pydantic Models =========
+
 
 class ChatRequest(BaseModel):
     user_id: str
@@ -22,6 +23,18 @@ class ChatRequest(BaseModel):
 class ChatResponse(BaseModel):
     reply: str
     history: List[Dict]
+
+
+class DiaryRequest(BaseModel):
+    messages: List[Dict]
+
+
+class DiaryResponse(BaseModel):
+    title: str
+    content: str
+    summary: str
+    mood: str
+    mood_score: int
 
 
 # ========= FastAPI app =========
@@ -134,4 +147,48 @@ async def chat_audio(
     return ChatResponse(
         reply=ai_reply,
         history=updated_conv["messages"],
+    )
+
+
+@app.post("/api/generate-diary", response_model=DiaryResponse)
+def generate_diary_endpoint(req: DiaryRequest):
+    """
+    Generate a diary entry based on conversation messages.
+
+    Input:
+        {
+            "messages": [
+                {"role": "user", "text": "..."},
+                {"role": "ai", "text": "..."},
+                ...
+            ]
+        }
+
+    Output:
+        {
+            "title": "Diary title",
+            "content": "Full diary content",
+            "summary": "Brief summary",
+            "mood": "positive/negative/neutral",
+            "mood_score": 2
+        }
+    """
+    if not req.messages or len(req.messages) == 0:
+        raise HTTPException(status_code=400, detail="No messages provided")
+
+    # Filter to ensure we have at least some user messages
+    user_messages = [m for m in req.messages if m.get("role") == "user"]
+    if len(user_messages) == 0:
+        raise HTTPException(
+            status_code=400, detail="No user messages found in conversation"
+        )
+
+    result = generate_diary(req.messages)
+
+    return DiaryResponse(
+        title=result["title"],
+        content=result["content"],
+        summary=result["summary"],
+        mood=result["mood"],
+        mood_score=result["mood_score"],
     )
