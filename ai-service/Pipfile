@@ -1,11 +1,21 @@
 [[source]]
+name = "pypi"
 url = "https://pypi.org/simple"
 verify_ssl = true
-name = "pypi"
 
 [packages]
+fastapi = "*"
+uvicorn = { extras = ["standard"], version = "*" }
+pymongo = "*"
+python-multipart = "*"
+pydantic = "*"
+faster-whisper = "*"
+google-generativeai = "*"
+python-dotenv = "*"
 
 [dev-packages]
+pytest = "*"
+coverage = "*"
 
 [requires]
-python_version = "3.14"
+python_version = "3.10"
