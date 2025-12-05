@@ -5,7 +5,7 @@ verify_ssl = true
 
 [packages]
 fastapi = "*"
-uvicorn = { extras = ["standard"], version = "*" }
+uvicorn = "*"
 pymongo = "*"
 python-multipart = "*"
 pydantic = "*"
