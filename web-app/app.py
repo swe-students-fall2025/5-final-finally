@@ -12,6 +12,7 @@ from pymongo import MongoClient
 from datetime import datetime
 from zoneinfo import ZoneInfo
 import requests
+
 AI_SERVICE_BASE = "http://localhost:8001"
 
 client = MongoClient("mongodb://localhost:27017/")
@@ -26,14 +27,32 @@ app.secret_key = "dev-secret-key"
 # ----------------------------
 
 POSITIVE_WORDS = {
-    "happy", "great", "good", "excited", "relaxed",
-    "fun", "love", "enjoy", "amazing", "wonderful",
+    "happy",
+    "great",
+    "good",
+    "excited",
+    "relaxed",
+    "fun",
+    "love",
+    "enjoy",
+    "amazing",
+    "wonderful",
 }
 
 NEGATIVE_WORDS = {
-    "sad", "tired", "exhausted", "stress", "stressed",
-    "anxious", "anxiety", "angry", "upset", "bad",
-    "worried", "frustrated", "depressed",
+    "sad",
+    "tired",
+    "exhausted",
+    "stress",
+    "stressed",
+    "anxious",
+    "anxiety",
+    "angry",
+    "upset",
+    "bad",
+    "worried",
+    "frustrated",
+    "depressed",
 }
 
 
@@ -81,6 +100,7 @@ def analyze_mood_and_summary(user_texts):
 # Auth
 # ----------------------------
 
+
 @app.route("/")
 def root():
     return redirect(url_for("login"))
@@ -104,7 +124,9 @@ def login():
 
     if user:
         if user.get("password") != password:
-            return render_template("login.html", error="Wrong password.", username=username)
+            return render_template(
+                "login.html", error="Wrong password.", username=username
+            )
     else:
         uid = users.insert_one({"username": username, "password": password}).inserted_id
         user = users.find_one({"_id": uid})
@@ -124,12 +146,15 @@ def logout():
 def home():
     if "user_id" not in session:
         return redirect(url_for("login"))
-    return render_template("index.html", user_id=session["user_id"], username=session["username"])
+    return render_template(
+        "index.html", user_id=session["user_id"], username=session["username"]
+    )
 
 
 # ----------------------------
 # Conversations
 # ----------------------------
+
 
 @app.route("/api/conversations", methods=["POST"])
 def start_conversation():
@@ -150,7 +175,7 @@ def start_conversation():
     greeting = "Hi! How was your day?"
     db.conversations.update_one(
         {"_id": r.inserted_id},
-        {"$push": {"messages": {"role": "ai", "text": greeting}}}
+        {"$push": {"messages": {"role": "ai", "text": greeting}}},
     )
 
     return jsonify({"conversation_id": cid, "first_message": greeting})
@@ -216,6 +241,7 @@ def add_message(cid):
 
     return jsonify({"user_message": user_msg, "ai_response": ai_msg})
 
+
 @app.route("/api/conversations/<cid>/audio", methods=["POST"])
 def add_audio_message(cid):
     """
@@ -259,9 +285,7 @@ def add_audio_message(cid):
 
     try:
         # per ai-service convention: pass user_id as query param, file field in files is named "file"
-        files = {
-            "file": (file.filename, file.stream, file.mimetype or "audio/wav")
-        }
+        files = {"file": (file.filename, file.stream, file.mimetype or "audio/wav")}
         params = {"user_id": session["user_id"]}
 
         r = requests.post(
@@ -302,10 +326,12 @@ def add_audio_message(cid):
     )
 
     # 4. Return to frontend
-    return jsonify({
-        "user_message": user_msg,
-        "ai_response": ai_msg,
-    })
+    return jsonify(
+        {
+            "user_message": user_msg,
+            "ai_response": ai_msg,
+        }
+    )
 
 
 @app.route("/api/conversations/<cid>/complete", methods=["POST"])
@@ -330,20 +356,57 @@ def complete_conversation(cid):
     time_str = now.strftime("%H:%M")
 
     msgs = conv.get("messages", [])
-    texts = [m["text"] for m in msgs if m.get("role") == "user"]
 
-    analysis = analyze_mood_and_summary(texts)
-    full = "\n".join(texts) if texts else "You had a short chat with your AI diary today."
+    # Try to use AI-generated diary
+    try:
+        r = requests.post(
+            f"{AI_SERVICE_BASE}/api/generate-diary", json={"messages": msgs}, timeout=30
+        )
+        if r.status_code == 200:
+            ai_diary = r.json()
+            title = ai_diary["title"]
+            content = ai_diary["content"]
+            summary = ai_diary["summary"]
+            mood = ai_diary["mood"]
+            mood_score = ai_diary.get("mood_score", 0)
+        else:
+            # Fallback to simple analysis
+            print("AI diary generation failed:", r.status_code, r.text)
+            texts = [m["text"] for m in msgs if m.get("role") == "user"]
+            analysis = analyze_mood_and_summary(texts)
+            title = analysis["title"]
+            content = (
+                "\n".join(texts)
+                if texts
+                else "You had a short chat with your AI diary today."
+            )
+            summary = analysis["summary"]
+            mood = analysis["mood"]
+            mood_score = analysis["mood_score"]
+    except Exception as e:
+        # Fallback if ai-service is down
+        print("Error calling ai-service for diary:", e)
+        texts = [m["text"] for m in msgs if m.get("role") == "user"]
+        analysis = analyze_mood_and_summary(texts)
+        title = analysis["title"]
+        content = (
+            "\n".join(texts)
+            if texts
+            else "You had a short chat with your AI diary today."
+        )
+        summary = analysis["summary"]
+        mood = analysis["mood"]
+        mood_score = analysis["mood_score"]
 
     diary = {
         "user_id": uid,
         "date": date_str,
         "time": time_str,
-        "title": analysis["title"],
-        "content": full,
-        "summary": analysis["summary"],
-        "mood": analysis["mood"],
-        "mood_score": analysis["mood_score"],
+        "title": title,
+        "content": content,
+        "summary": summary,
+        "mood": mood,
+        "mood_score": mood_score,
         "created_at": now,
         "conversation_id": oid,
     }
@@ -352,20 +415,24 @@ def complete_conversation(cid):
 
     db.conversations.update_one({"_id": oid}, {"$set": {"status": "completed"}})
 
-    return jsonify({
-        "diary_id": str(new_id),
-        "date": diary["date"],
-        "time": diary["time"],
-        "title": diary["title"],
-        "content": diary["content"],
-        "summary": diary["summary"],
-        "mood": diary["mood"],
-        "mood_score": diary["mood_score"],
-    })
+    return jsonify(
+        {
+            "diary_id": str(new_id),
+            "date": diary["date"],
+            "time": diary["time"],
+            "title": diary["title"],
+            "content": diary["content"],
+            "summary": diary["summary"],
+            "mood": diary["mood"],
+            "mood_score": diary["mood_score"],
+        }
+    )
+
 
 # ----------------------------
 # Diaries: list / detail / search / edit / delete
 # ----------------------------
+
 
 @app.route("/api/users/<uid>/diaries")
 def list_diaries(uid):
@@ -385,22 +452,26 @@ def list_diaries(uid):
 
     arr = []
     for d in cur:
-        arr.append({
-            "diary_id": str(d["_id"]),
-            "date": d.get("date"),
-            "title": d.get("title"),
-            "preview": d.get("summary") or d.get("content", "")[:80],
-            "mood": d.get("mood", "neutral"),
-        })
+        arr.append(
+            {
+                "diary_id": str(d["_id"]),
+                "date": d.get("date"),
+                "title": d.get("title"),
+                "preview": d.get("summary") or d.get("content", "")[:80],
+                "mood": d.get("mood", "neutral"),
+            }
+        )
 
     total = db.diaries.count_documents({"user_id": ObjectId(uid)})
 
-    return jsonify({
-        "diaries": arr,
-        "total": total,
-        "page": page,
-        "pages": (total + limit - 1) // limit,
-    })
+    return jsonify(
+        {
+            "diaries": arr,
+            "total": total,
+            "page": page,
+            "pages": (total + limit - 1) // limit,
+        }
+    )
 
 
 @app.route("/api/diaries/<diary_id>", methods=["GET", "PUT", "DELETE"])
@@ -416,43 +487,45 @@ def diary_detail(diary_id):
 
     # GET
     if request.method == "GET":
-        return jsonify({
-            "diary_id": str(doc["_id"]),
-            "date": doc.get("date"),
-            "time": doc.get("time"),
-            "title": doc.get("title"),
-            "content": doc.get("content", ""),
-            "summary": doc.get("summary", ""),
-            "mood": doc.get("mood", "neutral"),
-            "mood_score": doc.get("mood_score", 0),
-        })
+        return jsonify(
+            {
+                "diary_id": str(doc["_id"]),
+                "date": doc.get("date"),
+                "time": doc.get("time"),
+                "title": doc.get("title"),
+                "content": doc.get("content", ""),
+                "summary": doc.get("summary", ""),
+                "mood": doc.get("mood", "neutral"),
+                "mood_score": doc.get("mood_score", 0),
+            }
+        )
 
     # PUT update
     if request.method == "PUT":
         data = request.get_json() or {}
         new_content = data.get("content")
         if new_content is not None:
-            db.diaries.update_one(
-                {"_id": oid},
-                {"$set": {"content": new_content}}
-            )
+            db.diaries.update_one({"_id": oid}, {"$set": {"content": new_content}})
             doc["content"] = new_content
 
-        return jsonify({
-            "diary_id": str(doc["_id"]),
-            "date": doc.get("date"),
-            "time": doc.get("time"),
-            "title": doc.get("title"),
-            "content": doc.get("content", ""),
-            "summary": doc.get("summary", ""),
-            "mood": doc.get("mood", "neutral"),
-            "mood_score": doc.get("mood_score", 0),
-        })
+        return jsonify(
+            {
+                "diary_id": str(doc["_id"]),
+                "date": doc.get("date"),
+                "time": doc.get("time"),
+                "title": doc.get("title"),
+                "content": doc.get("content", ""),
+                "summary": doc.get("summary", ""),
+                "mood": doc.get("mood", "neutral"),
+                "mood_score": doc.get("mood_score", 0),
+            }
+        )
 
     # DELETE
     if request.method == "DELETE":
         db.diaries.delete_one({"_id": oid})
         return jsonify({"deleted": True})
+
 
 @app.route("/api/users/<uid>/diaries/search")
 def search_diaries(uid):
@@ -463,25 +536,31 @@ def search_diaries(uid):
     if not q:
         return jsonify({"diaries": []})
 
-    cur = db.diaries.find(
-        {
-            "user_id": ObjectId(uid),
-            "$or": [
-                {"title": {"$regex": q, "$options": "i"}},
-                {"content": {"$regex": q, "$options": "i"}},
-            ],
-        }
-    ).sort("date", -1).limit(30)
+    cur = (
+        db.diaries.find(
+            {
+                "user_id": ObjectId(uid),
+                "$or": [
+                    {"title": {"$regex": q, "$options": "i"}},
+                    {"content": {"$regex": q, "$options": "i"}},
+                ],
+            }
+        )
+        .sort("date", -1)
+        .limit(30)
+    )
 
     arr = []
     for d in cur:
-        arr.append({
-            "diary_id": str(d["_id"]),
-            "date": d.get("date"),
-            "title": d.get("title"),
-            "preview": d.get("summary") or d.get("content", "")[:80],
-            "mood": d.get("mood", "neutral"),
-        })
+        arr.append(
+            {
+                "diary_id": str(d["_id"]),
+                "date": d.get("date"),
+                "title": d.get("title"),
+                "preview": d.get("summary") or d.get("content", "")[:80],
+                "mood": d.get("mood", "neutral"),
+            }
+        )
 
     return jsonify({"diaries": arr})
 
