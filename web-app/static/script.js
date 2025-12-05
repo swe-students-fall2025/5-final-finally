@@ -12,8 +12,8 @@ function appendMessage(role, text) {
     const box = document.getElementById("conversation");
     if (!box) return;
     const row = document.createElement("div");
-    row.className = "msg-row msg-" + role;
-    row.textContent = role + ": " + text;
+    row.className = "msg " + role;
+    row.textContent = text;
     box.appendChild(row);
     box.scrollTop = box.scrollHeight;
 }
@@ -40,6 +40,28 @@ async function startConversation() {
     setConversationStatus("Starting conversation...");
     const box = document.getElementById("conversation");
     if (box) box.innerHTML = "";
+
+    const rightCard = document.querySelector('.chat-right');
+    if (rightCard) {
+        rightCard.classList.add('hidden');
+    }
+
+    const leftCard = document.querySelector('.chat-left');
+    if (leftCard) {
+        leftCard.classList.remove('normal-width');
+        leftCard.classList.add('full-width');
+    }
+
+    const titleEl = document.getElementById("diary-title-chat");
+    const dateEl = document.getElementById("diary-date-chat");
+    const moodEl = document.getElementById("diary-mood-chat");
+    const contentEl = document.getElementById("diary-content-chat");
+    
+    if (titleEl) titleEl.textContent = "";
+    if (dateEl) dateEl.textContent = "";
+    if (moodEl) moodEl.textContent = "";
+    if (contentEl) contentEl.textContent = "";
+
 
     try {
         const res = await fetch("/api/conversations", {
@@ -75,6 +97,7 @@ async function startConversation() {
         setConversationStatus("Failed to start conversation.");
     }
 }
+
 
 async function sendAudioMessage(blob) {
     if (!currentConversationId) {
@@ -196,6 +219,17 @@ async function completeConversation() {
         }
 
         const data = await res.json();
+
+        const rightCard = document.querySelector('.chat-right');
+        if (rightCard) {
+            rightCard.classList.remove('hidden');
+        }
+
+        const leftCard = document.querySelector('.chat-left');
+        if (leftCard) {
+            leftCard.classList.remove('full-width');
+            leftCard.classList.add('normal-width');
+        }
 
         const titleEl = document.getElementById("diary-title-chat");
         const dateEl = document.getElementById("diary-date-chat");
@@ -495,3 +529,4 @@ document.addEventListener("DOMContentLoaded", () => {
 
     setupNav();
 });
+

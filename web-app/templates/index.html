@@ -11,16 +11,15 @@
         <div class="app-title">AI Voice Diary</div>
         <div class="user-row">
             <div class="app-user">Hi, {{ username }} !</div>
-            <button id="start-conversation-btn">Start a New Conversation</button>
         </div>
     </header>
 
     <main class="app-main">
         <!-- Chat / recording -->
         <section class="page-section" id="section-chat">
-
+            <button id="start-conversation-btn">Start a New Conversation</button>
             <div class="chat-layout">
-                <div class="chat-left">
+                <div class="chat-left full-width">
                     <h3>Today's Conversation</h3>
                     <div id="conversation" class="conversation-box"></div>
 
@@ -35,7 +34,7 @@
                     </div>
                 </div>
 
-                <div class="chat-right">
+                <div class="chat-right hidden" id="diary-preview-box">
                     <h4>Today&apos;s Diary (preview)</h4>
                     <article id="diary-detail-chat" class="diary-preview">
                         <h5 id="diary-title-chat"></h5>
@@ -55,16 +54,16 @@
                 <input id="diary-search-input" placeholder="Search by keyword..." />
                 <button id="diary-search-btn">Search</button>
                 <button id="diary-search-clear-btn">Clear</button>
+                <button id="load-diaries-btn">Reload Diaries</button>
             </div>
 
-            <button id="load-diaries-btn">Reload Diaries</button>
-
+            
             <div class="diary-layout">
                 <ul id="diary-list"></ul>
 
                 <article id="diary-detail" class="diary-detail">
                     <h4 id="diary-title"></h4>
-                    <p id="diary-date"></p>
+                    <p id="diary-date"></p> 
                     <p id="diary-time"></p> 
                     <p id="diary-mood"></p>
                     <p id="diary-content"></p>
