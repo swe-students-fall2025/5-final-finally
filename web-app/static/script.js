@@ -88,7 +88,7 @@ async function sendAudioMessage(blob) {
         fd.append("audio", blob, "audio.webm");
 
         const res = await fetch(
-            `/api/conversations/${currentConversationId}/messages`,
+            `/api/conversations/${currentConversationId}/audio`,
             {
                 method: "POST",
                 body: fd,
@@ -414,13 +414,13 @@ async function deleteCurrentDiary() {
         const titleEl = document.getElementById("diary-title");
         const contentEl = document.getElementById("diary-content");
         const dateEl = document.getElementById("diary-date");
-        const timeEl = document.getElementById("diary-time");   // ← 新增
+        const timeEl = document.getElementById("diary-time");
         const moodEl = document.getElementById("diary-mood");
 
         if (titleEl) titleEl.textContent = "";
         if (contentEl) contentEl.textContent = "";
         if (dateEl) dateEl.textContent = "";
-        if (timeEl) timeEl.textContent = "";                    // ← 新增
+        if (timeEl) timeEl.textContent = "";
         if (moodEl) moodEl.textContent = "";
 
         const actions = document.querySelector(".diary-actions");

@@ -11,6 +11,8 @@ from bson import ObjectId
 from pymongo import MongoClient
 from datetime import datetime
 from zoneinfo import ZoneInfo
+import requests
+AI_SERVICE_BASE = "http://localhost:8001"
 
 client = MongoClient("mongodb://localhost:27017/")
 db = client["diary_db"]
@@ -170,9 +172,34 @@ def add_message(cid):
     if str(conv["user_id"]) != session["user_id"]:
         return jsonify({"error": "Forbidden"}), 403
 
-    user_msg = "This is a placeholder transcription of your audio."
-    ai_msg = "Thanks for sharing! Tell me more about your day."
+    # 1. Get user input from frontend (Minimal version: Frontend sends JSON { "text": "..." })
+    data = request.get_json() or {}
+    user_msg = data.get("text", "").strip()
 
+    if not user_msg:
+        # If the frontend isn't ready yet, you can keep a default placeholder
+        user_msg = "This is a placeholder transcription of your audio."
+
+    # 2. Call ai-service's /api/chat to get AI reply
+    ai_msg = "Thanks for sharing! Tell me more about your day."  # fallback
+
+    try:
+        payload = {
+            "user_id": session["user_id"],  # Use the current logged-in user ID
+            "text": user_msg,
+        }
+        r = requests.post(f"{AI_SERVICE_BASE}/api/chat", json=payload, timeout=10)
+        if r.status_code == 200:
+            data = r.json()
+            ai_msg = data.get("reply", ai_msg)
+        else:
+            # Log the error here for future debugging
+            print("AI-service error:", r.status_code, r.text)
+    except Exception as e:
+        # If ai-service is down, fallback to default text to ensure user experience
+        print("Error calling ai-service:", e)
+
+    # 3. As before: push both user + ai messages to the current conversation
     db.conversations.update_one(
         {"_id": oid},
         {
@@ -188,6 +215,97 @@ def add_message(cid):
     )
 
     return jsonify({"user_message": user_msg, "ai_response": ai_msg})
+
+@app.route("/api/conversations/<cid>/audio", methods=["POST"])
+def add_audio_message(cid):
+    """
+    Audio version of add_message:
+
+    Frontend: POST /api/conversations/<cid>/audio
+      - Content-Type: multipart/form-data
+      - Fields:
+          audio: Audio file (required)
+
+    Flask logic:
+      1. Check login & conversation ownership.
+      2. Retrieve the file and forward it to ai-service /api/chat/audio.
+      3. Extract the transcribed text + AI reply from the ai-service response.
+      4. Write to diary_db.conversations for the current conversation.
+      5. Return results to the frontend.
+    """
+    if "user_id" not in session:
+        return jsonify({"error": "Not logged in"}), 401
+
+    # Validate conversation ID
+    try:
+        oid = ObjectId(cid)
+    except Exception:
+        return jsonify({"error": "Invalid id"}), 400
+
+    conv = db.conversations.find_one({"_id": oid})
+    if not conv:
+        return jsonify({"error": "Not found"}), 404
+    if str(conv["user_id"]) != session["user_id"]:
+        return jsonify({"error": "Forbidden"}), 403
+
+    # 1. Retrieve audio file from form data (frontend field name is "audio")
+    file = request.files.get("audio")
+    if file is None or file.filename == "":
+        return jsonify({"error": "No audio file uploaded"}), 400
+
+    # 2. Call ai-service's /api/chat/audio
+    user_msg = "This is a placeholder transcription of your audio."
+    ai_msg = "Thanks for sharing! Tell me more about your day."
+
+    try:
+        # per ai-service convention: pass user_id as query param, file field in files is named "file"
+        files = {
+            "file": (file.filename, file.stream, file.mimetype or "audio/wav")
+        }
+        params = {"user_id": session["user_id"]}
+
+        r = requests.post(
+            f"{AI_SERVICE_BASE}/api/chat/audio",
+            params=params,
+            files=files,
+            timeout=60,
+        )
+
+        if r.status_code == 200:
+            data = r.json()
+            ai_msg = data.get("reply", ai_msg)
+
+            # Find the "last user message" in history to treat as the transcribed text
+            history = data.get("history", [])
+            for m in reversed(history):
+                if m.get("role") == "user":
+                    user_msg = m.get("text", user_msg)
+                    break
+        else:
+            print("AI-service audio error:", r.status_code, r.text)
+    except Exception as e:
+        print("Error calling ai-service audio endpoint:", e)
+
+    # 3. Same as text endpoint: push both user + ai messages to diary_db.conversations
+    db.conversations.update_one(
+        {"_id": oid},
+        {
+            "$push": {
+                "messages": {
+                    "$each": [
+                        {"role": "user", "text": user_msg},
+                        {"role": "ai", "text": ai_msg},
+                    ]
+                }
+            }
+        },
+    )
+
+    # 4. Return to frontend
+    return jsonify({
+        "user_message": user_msg,
+        "ai_response": ai_msg,
+    })
 
 
 @app.route("/api/conversations/<cid>/complete", methods=["POST"])
@@ -220,7 +338,7 @@ def complete_conversation(cid):
     diary = {
         "user_id": uid,
         "date": date_str,
-        "time": time_str,                 # ← 关键：这里一定要有
+        "time": time_str,
         "title": analysis["title"],
         "content": full,
         "summary": analysis["summary"],
@@ -301,7 +419,7 @@ def diary_detail(diary_id):
         return jsonify({
             "diary_id": str(doc["_id"]),
             "date": doc.get("date"),
-            "time": doc.get("time"),            # ← 关键：这里要有 time
+            "time": doc.get("time"),
             "title": doc.get("title"),
             "content": doc.get("content", ""),
             "summary": doc.get("summary", ""),
@@ -309,7 +427,7 @@ def diary_detail(diary_id):
             "mood_score": doc.get("mood_score", 0),
         })
 
-    # PUT 更新内容
+    # PUT update
     if request.method == "PUT":
         data = request.get_json() or {}
         new_content = data.get("content")
