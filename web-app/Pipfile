@@ -13,6 +13,7 @@ black = "*"
 pylint = "*"
 colorama = "*"
 flask-cors = "*"
+requests = "*"
 
 [dev-packages]
 black = "*"
