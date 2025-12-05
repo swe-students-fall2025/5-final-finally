@@ -9,19 +9,19 @@
 <div class="app-root">
     <header class="app-header">
         <div class="app-title">AI Voice Diary</div>
-        <div class="app-user">Hi, {{ username }}</div>
+        <div class="user-row">
+            <div class="app-user">Hi, {{ username }} !</div>
+            <button id="start-conversation-btn">Start a New Conversation</button>
+        </div>
     </header>
 
     <main class="app-main">
         <!-- Chat / recording -->
         <section class="page-section" id="section-chat">
-            <div class="chat-header">
-                <h3>Today's Conversation</h3>
-                <button id="start-conversation-btn">Start New Conversation</button>
-            </div>
 
             <div class="chat-layout">
                 <div class="chat-left">
+                    <h3>Today's Conversation</h3>
                     <div id="conversation" class="conversation-box"></div>
 
                     <div class="record-controls">

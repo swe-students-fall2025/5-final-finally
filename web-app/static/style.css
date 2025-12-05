@@ -1,8 +1,22 @@
+@font-face {
+    font-family: 'MyFont';
+    src: url('/static/MyFont.otf');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Font2';
+    src: url('/static/Font2.otf');
+    font-weight: normal;
+    font-style: normal;
+}
+
 body {
     font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
     margin: 0;
     padding: 0;
-    background: #f5f5f5;
+    background: url('/static/indexImage.png') no-repeat center center / cover;
 }
 
 .container {
@@ -14,12 +28,6 @@ body {
     gap: 16px;
 }
 
-section {
-    background: #ffffff;
-    padding: 12px 16px;
-    border-radius: 8px;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-}
 
 h2 {
     margin-top: 0;
@@ -72,62 +80,97 @@ h2 {
     background: #f1f5f9;
 }
 
+
+.login-title {
+    font-family: 'MyFont', serif;
+    font-size: 70px;
+    color: #3b2f2f;
+    width: 420px;
+    text-align: center;
+    margin-bottom: 15px;
+    margin-top: -100px;
+}
+
+
 .login-body {
-    background: #0f172a;
-    color: #e5e7eb;
+    background: url('/static/bgImage.png') no-repeat center center / cover;
     display: flex;
-    align-items: center;
+    flex-direction: column; 
+
     justify-content: center;
+    padding-left: 750px;
     min-height: 100vh;
     margin: 0;
 }
 
 .login-container {
-    background: #020617;
-    padding: 24px 28px;
+    background: rgba(255,255,255,0.75); 
+    backdrop-filter: blur(12px); 
+    -webkit-backdrop-filter: blur(12px);
+    color: #333;
     border-radius: 16px;
-    max-width: 360px;
-    width: 100%;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    padding: 22px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.25); 
+    width: 360px;
 }
 
 .app-title {
+    font-family: 'MyFont', serif;   /* 换成你喜欢的字体 */
+    font-size: 40px;                /* 调大字体 */
+    font-weight: 600;
+    color: #3b2f2f;                 /* 深咖色，与你的风格一致 */
+    margin-top: 10px;
     text-align: center;
-    margin-top: 0;
-    margin-bottom: 16px;
+    flex: 1;                        /* 让标题水平居中对齐 */
 }
+
 
 .login-form label {
-    display: block;
-    font-size: 14px;
-    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    width: 316px;
+    margin: 0 auto 20px auto;
+
+    font-family: 'MyFont', serif;
+    font-size: 22px;
 }
+
+
 
 .login-form input {
-    width: 100%;
-    margin-top: 4px;
-    padding: 8px 10px;
-    border-radius: 8px;
-    border: 1px solid #334155;
-    background: #020617;
-    color: #e5e7eb;
+    width: 210px;
+    padding: 12px 14px;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.95);
+    box-sizing: border-box;
 }
+
 
 .primary-btn {
-    width: 100%;
-    margin-top: 16px;
-    padding: 10px 0;
-    border-radius: 999px;
-    border: none;
-    background: #38bdf8;
-    color: #020617;
+    width: 316px;
+    margin: 5px 22px;
+    padding: 5px;
+    background: #d8a87b;
+    border-radius: 14px;
+    color: #fff;
     font-weight: 600;
+    border: none;
     cursor: pointer;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+    font-family: 'MyFont', serif;
+    font-size: 20px;
 }
 
+
 .primary-btn:hover {
-    filter: brightness(1.05);
+    background: #c8966f;
+    transform: scale(1.05);       /* ⭐ 放大 5% */
+    transition: 0.25s ease; 
 }
+
 
 .error-msg {
     background: #b91c1c;
@@ -135,12 +178,15 @@ h2 {
     border-radius: 8px;
     font-size: 13px;
     margin-bottom: 10px;
+    color: white;
+    text-align: center;
 }
 
 .hint {
     font-size: 12px;
-    margin-top: 10px;
+    margin: 5px 35px; 
     color: #9ca3af;
+    text-align: center;
 }
 
 .main-page {
@@ -153,26 +199,37 @@ h2 {
     right: 0;
     bottom: 0;
     height: 56px;
-    background: #020617;
+
     display: flex;
     justify-content: space-around;
     align-items: center;
-    border-top: 1px solid #1f2933;
+    background-color:#cdc9c4;
+    border-top: none;
 }
 
 .bottom-nav .nav-btn {
     flex: 1;
     height: 100%;
     border: none;
-    background: transparent;
-    color: #e5e7eb;
-    font-size: 14px;
     cursor: pointer;
+    background: transparent;
+    font-family: 'MyFont';
+    font-size: 30px;
+    font-weight: 400;
+    color: black;
 }
 
+
 .bottom-nav .nav-btn.active {
-    background: #111827;
+    background: rgba(255, 255, 255, 0.25);  /* 柔和高亮 */
     font-weight: 600;
+}
+
+.bottom-nav .nav-btn:hover {
+    background: #2d3648;
+    color: white;
+    transform: scale(1.05);   /* 放大 5% */
+    transition: 0.25s ease;
 }
 
 .page-section.hidden {
@@ -237,4 +294,85 @@ h2 {
 
 .hidden {
     display: none !important;
+}
+
+
+.chat-left, .chat-right {
+    background: white;
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+
+    /* ⭐ 关键部分：固定盒子大小 */
+    width: 600px;      /* 你可以调整为你想要的宽度 */
+    height: 450px;     /* 固定高度，让框不要变 */
+    box-sizing: border-box;
+
+    /* 让内容超出时出现滚动条（避免撑大卡片）*/
+    overflow-y: auto;
+}
+
+.chat-left h3,
+.chat-right h4 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    line-height: 1;          /* ⭐ 修复行距过大的问题 */
+    font-family: 'MyFont';   /* 你目前希望标题是 MyFont */
+    font-size: 32px;
+}
+
+
+.chat-layout {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 40px;
+    margin-top: 30px;
+    margin-left: 20px;
+}
+
+.user-row {
+    display: flex;
+    align-items: center;      /* 垂直居中 */
+    gap: 12px;                /* 两者间距 */
+    margin-left: 120px;        /* 让它与卡片左边对齐 */
+    margin-bottom: 12px;
+}
+
+
+/* 1. Hi, sophia! */
+.app-user {
+    font-family: 'Font2', sans-serif;
+    font-size: 50px;
+}
+
+/* 2. Today's Conversation 标题 */
+.chat-left h3 {
+    font-family: 'MyFont', sans-serif;
+    font-size: 30px;
+}
+
+/* 3. Today's Diary (preview) 标题 */
+.chat-right h4 {
+    font-family: 'MyFont', sans-serif;
+    font-size: 30px;
+}
+
+/* 4. 日记标题（A regular day） */
+#diary-title,
+#diary-title-chat {
+    font-family: 'Font2', sans-serif;
+    font-size: 40px;
+}
+
+/* 5. diary preview 内所有内容（日期、心情、正文） */
+#diary-date,
+#diary-time,
+#diary-mood,
+#diary-content,
+#diary-date-chat,
+#diary-mood-chat,
+#diary-content-chat {
+    font-family: 'Font2', sans-serif;
+    font-size: 40px;
 }
