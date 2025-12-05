@@ -26,6 +26,7 @@
                     <div class="record-controls">
                         <button id="start-recording-btn" disabled>🎙 Start</button>
                         <button id="stop-recording-btn" disabled>⏹ Stop</button>
+                        <button id="open-preferences-btn" disabled>⚙ Diary Settings</button>
                         <button id="finish-conversation-btn" disabled>Finish &amp; Generate Diary</button>
                     </div>
 
@@ -46,6 +47,82 @@
             </div>
         </section>
 
+
+        <!-- Diary Preferences Modal -->
+        <div id="preferences-modal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Diary Generation Settings</h3>
+                    <button id="close-preferences-btn" class="close-btn">&times;</button>
+                </div>
+                
+                <div class="modal-body">
+                    <!-- Theme Selection -->
+                    <div class="preference-group">
+                        <label>Theme / Topic Focus</label>
+                        <select id="diary-theme">
+                            <option value="">-- Auto detect --</option>
+                            <option value="daily life">Daily Life</option>
+                            <option value="work">Work & Career</option>
+                            <option value="travel">Travel & Adventure</option>
+                            <option value="relationships">Relationships & Social</option>
+                            <option value="health">Health & Wellness</option>
+                            <option value="personal growth">Personal Growth</option>
+                            <option value="hobbies">Hobbies & Interests</option>
+                            <option value="gratitude">Gratitude & Appreciation</option>
+                        </select>
+                    </div>
+
+                    <!-- Style Selection -->
+                    <div class="preference-group">
+                        <label>Writing Style</label>
+                        <select id="diary-style">
+                            <option value="">-- Default --</option>
+                            <option value="reflective">Reflective & Thoughtful</option>
+                            <option value="humorous">Light & Humorous</option>
+                            <option value="poetic">Poetic & Descriptive</option>
+                            <option value="professional">Professional & Structured</option>
+                            <option value="casual">Casual & Friendly</option>
+                            <option value="motivational">Motivational & Inspiring</option>
+                        </select>
+                    </div>
+
+                    <!-- Custom Instructions -->
+                    <div class="preference-group">
+                        <label>Custom Instructions (optional)</label>
+                        <div class="custom-input-container">
+                            <textarea 
+                                id="custom-instructions" 
+                                placeholder="Add any specific requests... e.g., 'Focus on my feelings about the new project' or 'Include lessons learned'"
+                                rows="3"
+                            ></textarea>
+                            <div class="voice-input-controls">
+                                <button id="start-voice-input-btn" class="voice-btn" title="Voice input">🎤</button>
+                                <button id="stop-voice-input-btn" class="voice-btn hidden" title="Stop recording">⏹</button>
+                                <span id="voice-input-status"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Templates -->
+                    <div class="preference-group">
+                        <label>Quick Templates</label>
+                        <div class="template-buttons">
+                            <button class="template-btn" data-template="Focus on the emotions and feelings I expressed">Emotional Focus</button>
+                            <button class="template-btn" data-template="Include actionable takeaways and next steps">Action Items</button>
+                            <button class="template-btn" data-template="Write as if I'm looking back on this day years from now">Future Reflection</button>
+                            <button class="template-btn" data-template="Keep it brief and highlight only the key moments">Brief Summary</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button id="reset-preferences-btn" class="secondary-btn">Reset</button>
+                    <button id="save-preferences-btn" class="primary-btn">Save & Close</button>
+                </div>
+            </div>
+        </div>
+        
         <!-- My diaries -->
         <section class="page-section hidden" id="section-diaries">
             <h3>My Diaries</h3>

@@ -3,6 +3,17 @@ let mediaRecorder = null;
 let audioChunks = [];
 let currentDiaryId = null;
 
+// Voice input for preferences
+let voiceInputRecorder = null;
+let voiceInputChunks = [];
+
+// Diary preferences
+let diaryPreferences = {
+    theme: null,
+    style: null,
+    custom_instructions: null
+};
+
 function setConversationStatus(text) {
     const el = document.getElementById("conversation-status");
     if (el) el.textContent = text;
@@ -22,10 +33,12 @@ function setRecordingButtons(options) {
     const startBtn = document.getElementById("start-recording-btn");
     const stopBtn = document.getElementById("stop-recording-btn");
     const finishBtn = document.getElementById("finish-conversation-btn");
+    const prefsBtn = document.getElementById("open-preferences-btn");
 
     if (startBtn) startBtn.disabled = !options.canRecord;
     if (stopBtn) stopBtn.disabled = !options.canStop;
     if (finishBtn) finishBtn.disabled = !options.canComplete;
+    if (prefsBtn) prefsBtn.disabled = !options.canComplete;
 }
 
 function moodToEmoji(mood) {
@@ -34,12 +47,165 @@ function moodToEmoji(mood) {
     return "😐 Neutral";
 }
 
+// ----------------- Preferences Modal -----------------
+
+function openPreferencesModal() {
+    const modal = document.getElementById("preferences-modal");
+    if (modal) {
+        modal.classList.remove("hidden");
+        document.getElementById("diary-theme").value = diaryPreferences.theme || "";
+        document.getElementById("diary-style").value = diaryPreferences.style || "";
+        document.getElementById("custom-instructions").value = diaryPreferences.custom_instructions || "";
+    }
+}
+
+function closePreferencesModal() {
+    const modal = document.getElementById("preferences-modal");
+    if (modal) {
+        modal.classList.add("hidden");
+    }
+}
+
+function savePreferences() {
+    const theme = document.getElementById("diary-theme").value;
+    const style = document.getElementById("diary-style").value;
+    const customInstructions = document.getElementById("custom-instructions").value.trim();
+
+    diaryPreferences = {
+        theme: theme || null,
+        style: style || null,
+        custom_instructions: customInstructions || null
+    };
+
+    closePreferencesModal();
+    
+    const hasPrefs = theme || style || customInstructions;
+    if (hasPrefs) {
+        setConversationStatus("Diary settings saved. Ready to generate.");
+    } else {
+        setConversationStatus("Using default settings. Ready to generate.");
+    }
+}
+
+function resetPreferences() {
+    document.getElementById("diary-theme").value = "";
+    document.getElementById("diary-style").value = "";
+    document.getElementById("custom-instructions").value = "";
+    diaryPreferences = {
+        theme: null,
+        style: null,
+        custom_instructions: null
+    };
+}
+
+function applyTemplate(template) {
+    const textarea = document.getElementById("custom-instructions");
+    if (textarea) {
+        const currentText = textarea.value.trim();
+        if (currentText) {
+            textarea.value = currentText + "\n" + template;
+        } else {
+            textarea.value = template;
+        }
+    }
+}
+
+// ----------------- Voice Input for Preferences -----------------
+
+async function startVoiceInput() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        document.getElementById("voice-input-status").textContent = "Not supported";
+        return;
+    }
+
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        voiceInputRecorder = new MediaRecorder(stream);
+        voiceInputChunks = [];
+
+        voiceInputRecorder.ondataavailable = (e) => {
+            if (e.data.size > 0) {
+                voiceInputChunks.push(e.data);
+            }
+        };
+
+        voiceInputRecorder.onstop = async () => {
+            const blob = new Blob(voiceInputChunks, { type: "audio/webm" });
+            await transcribeVoiceInput(blob);
+        };
+
+        voiceInputRecorder.start();
+        
+        document.getElementById("start-voice-input-btn").classList.add("hidden");
+        document.getElementById("stop-voice-input-btn").classList.remove("hidden");
+        document.getElementById("voice-input-status").textContent = "Recording...";
+    } catch (err) {
+        console.error(err);
+        document.getElementById("voice-input-status").textContent = "Failed to start";
+    }
+}
+
+function stopVoiceInput() {
+    if (voiceInputRecorder && voiceInputRecorder.state === "recording") {
+        voiceInputRecorder.stop();
+        document.getElementById("start-voice-input-btn").classList.remove("hidden");
+        document.getElementById("stop-voice-input-btn").classList.add("hidden");
+        document.getElementById("voice-input-status").textContent = "Processing...";
+    }
+}
+
+async function transcribeVoiceInput(blob) {
+    try {
+        const fd = new FormData();
+        fd.append("audio", blob, "voice-input.webm");
+
+        const res = await fetch("/api/transcribe", {
+            method: "POST",
+            body: fd,
+        });
+
+        if (res.status === 401) {
+            window.location.href = "/login";
+            return;
+        }
+
+        if (res.ok) {
+            const data = await res.json();
+            const text = data.text || "";
+            
+            if (text) {
+                const textarea = document.getElementById("custom-instructions");
+                const currentText = textarea.value.trim();
+                if (currentText) {
+                    textarea.value = currentText + " " + text;
+                } else {
+                    textarea.value = text;
+                }
+                document.getElementById("voice-input-status").textContent = "Added!";
+            } else {
+                document.getElementById("voice-input-status").textContent = "No speech detected";
+            }
+        } else {
+            document.getElementById("voice-input-status").textContent = "Transcription failed";
+        }
+    } catch (err) {
+        console.error(err);
+        document.getElementById("voice-input-status").textContent = "Error";
+    }
+
+    setTimeout(() => {
+        document.getElementById("voice-input-status").textContent = "";
+    }, 2000);
+}
+
 // ----------------- Chat / conversation -----------------
 
 async function startConversation() {
     setConversationStatus("Starting conversation...");
     const box = document.getElementById("conversation");
     if (box) box.innerHTML = "";
+    // Reset preferences for new conversation
+    resetPreferences();
 
     const rightCard = document.querySelector('.chat-right');
     if (rightCard) {
@@ -205,9 +371,22 @@ async function completeConversation() {
     setConversationStatus("Finishing conversation...");
 
     try {
+        const body = {};
+        
+        if (diaryPreferences.theme || diaryPreferences.style || diaryPreferences.custom_instructions) {
+            body.preferences = {};
+            if (diaryPreferences.theme) body.preferences.theme = diaryPreferences.theme;
+            if (diaryPreferences.style) body.preferences.style = diaryPreferences.style;
+            if (diaryPreferences.custom_instructions) body.preferences.custom_instructions = diaryPreferences.custom_instructions;
+        }
+
         const res = await fetch(
             `/api/conversations/${currentConversationId}/complete`,
-            { method: "POST" }
+            { 
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(body)
+            }
         );
 
         if (res.status === 401) {
@@ -249,6 +428,8 @@ async function completeConversation() {
         });
 
         currentConversationId = null;
+        resetPreferences();
+
         await loadDiaries();
     } catch (err) {
         console.error(err);
@@ -510,6 +691,18 @@ document.addEventListener("DOMContentLoaded", () => {
     const searchClearBtn = document.getElementById("diary-search-clear-btn");
     const editBtn = document.getElementById("diary-edit-btn");
     const deleteBtn = document.getElementById("diary-delete-btn");
+    // Preferences modal buttons
+    const openPrefsBtn = document.getElementById("open-preferences-btn");
+    const closePrefsBtn = document.getElementById("close-preferences-btn");
+    const savePrefsBtn = document.getElementById("save-preferences-btn");
+    const resetPrefsBtn = document.getElementById("reset-preferences-btn");
+
+    // Voice input buttons
+    const startVoiceBtn = document.getElementById("start-voice-input-btn");
+    const stopVoiceBtn = document.getElementById("stop-voice-input-btn");
+
+    // Template buttons
+    const templateBtns = document.querySelectorAll(".template-btn");
 
     if (startConvBtn) startConvBtn.addEventListener("click", startConversation);
     if (startRecBtn) startRecBtn.addEventListener("click", startRecording);
@@ -526,7 +719,32 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     if (editBtn) editBtn.addEventListener("click", editCurrentDiary);
     if (deleteBtn) deleteBtn.addEventListener("click", deleteCurrentDiary);
+    if (openPrefsBtn) openPrefsBtn.addEventListener("click", openPreferencesModal);
+    if (closePrefsBtn) closePrefsBtn.addEventListener("click", closePreferencesModal);
+    if (savePrefsBtn) savePrefsBtn.addEventListener("click", savePreferences);
+    if (resetPrefsBtn) resetPrefsBtn.addEventListener("click", resetPreferences);
 
+    // Voice input
+    if (startVoiceBtn) startVoiceBtn.addEventListener("click", startVoiceInput);
+    if (stopVoiceBtn) stopVoiceBtn.addEventListener("click", stopVoiceInput);
+
+    // Template buttons
+    templateBtns.forEach(btn => {
+        btn.addEventListener("click", () => {
+            const template = btn.dataset.template;
+            if (template) applyTemplate(template);
+        });
+    });
+
+    // Close modal when clicking outside
+    const modal = document.getElementById("preferences-modal");
+    if (modal) {
+        modal.addEventListener("click", (e) => {
+            if (e.target === modal) {
+                closePreferencesModal();
+            }
+        });
+    }
     setupNav();
 });
 

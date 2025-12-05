@@ -19,11 +19,21 @@ def generate_cheerful_reply(user_text: str) -> str:
     return response.text.strip()
 
 
-def generate_diary(messages: list) -> dict:
+def generate_diary(
+    messages: list,
+    theme: str = None,
+    style: str = None,
+    custom_instructions: str = None,
+) -> dict:
     """
-    Generate a diary entry based on conversation messages.
+    Generate a diary entry based on conversation messages and user preferences.
+
     Args:
-        messages: List of message map with 'role' ('user'/'ai') and 'text' keys
+        messages: List of message dicts with 'role' ('user'/'ai') and 'text' keys
+        theme: Optional theme for the diary (e.g., "daily life", "work", "travel")
+        style: Optional writing style (e.g., "reflective", "humorous", "poetic")
+        custom_instructions: Optional custom instructions from user
+
     Returns:
         dict with 'title', 'content', 'summary', 'mood', 'mood_score'
     """
@@ -34,19 +44,41 @@ def generate_diary(messages: list) -> dict:
         text = msg.get("text", "")
         conversation_text += f"{role}: {text}\n"
 
+    # Build preference instructions
+    preference_text = ""
+    if theme:
+        preference_text += f"\n- Theme/Topic Focus: {theme}"
+    if style:
+        preference_text += f"\n- Writing Style: {style}"
+    if custom_instructions:
+        preference_text += f"\n- Additional Instructions: {custom_instructions}"
+
+    # If no preferences, use default
+    if not preference_text:
+        preference_text = "\n- Use a warm, personal, reflective style"
+
     prompt = f"""
 You are a professional diary writing assistant. Based on the following conversation between a user and an AI assistant, generate a warm, personal first-person diary entry.
 
-Requirements:
+User Preferences:{preference_text}
+
+Core Requirements:
 1. Write in first person ("I")
 2. Extract key events, emotions, and feelings from the conversation
 3. Do NOT simply repeat the conversation - write it like a real diary with reflection and emotion
 4. Use natural, flowing language as if written by a real person
 5. Length: 150-300 words
-6. Generate an appropriate diary title
+6. Generate an appropriate diary title that reflects the content and theme
 7. Generate a brief summary (1-2 sentences)
-8. Analyze the overall mood: must be one of "positive", "negative", or "neutral"
-9. Provide a mood_score: positive number for positive mood, negative for negative, 0 for neutral (range: -5 to 5)
+8. Analyze the overall mood: must be exactly one of "positive", "negative", or "neutral"
+9. Provide a mood_score: positive number (1-5) for positive mood, negative (-1 to -5) for negative, 0 for neutral
+
+Style Guidelines:
+- If "reflective" style: Include thoughtful insights and lessons learned
+- If "humorous" style: Add light-hearted observations and witty remarks
+- If "poetic" style: Use more descriptive language and metaphors
+- If "professional" style: Keep it structured and goal-oriented
+- If "casual" style: Write as if talking to a close friend
 
 Conversation:
 {conversation_text}
@@ -65,7 +97,6 @@ Respond ONLY with valid JSON in this exact format (no markdown, no extra text):
         # Remove markdown code blocks if present
         if text.startswith("```"):
             lines = text.split("\n")
-            # Remove first line (```json) and last line (```)
             text = "\n".join(lines[1:-1])
         text = text.strip()
 
@@ -79,7 +110,7 @@ Respond ONLY with valid JSON in this exact format (no markdown, no extra text):
         # Validate mood_score
         try:
             mood_score = int(result.get("mood_score", 0))
-            mood_score = max(-5, min(5, mood_score))  # Clamp to range
+            mood_score = max(-5, min(5, mood_score))
         except (ValueError, TypeError):
             mood_score = 0
 
