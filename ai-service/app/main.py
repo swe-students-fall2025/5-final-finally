@@ -1,10 +1,13 @@
 import warnings
-warnings.filterwarnings("ignore", category=UserWarning, module='multiprocessing.resource_tracker')
+
+warnings.filterwarnings(
+    "ignore", category=UserWarning, module="multiprocessing.resource_tracker"
+)
 
 import os
 import tempfile
 from pathlib import Path
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 from fastapi import FastAPI, UploadFile, File, HTTPException, Query
 from pydantic import BaseModel
@@ -28,8 +31,15 @@ class ChatResponse(BaseModel):
     history: List[Dict]
 
 
+class DiaryPreferences(BaseModel):
+    theme: Optional[str] = None
+    style: Optional[str] = None
+    custom_instructions: Optional[str] = None
+
+
 class DiaryRequest(BaseModel):
     messages: List[Dict]
+    preferences: Optional[DiaryPreferences] = None
 
 
 class DiaryResponse(BaseModel):
@@ -38,6 +48,10 @@ class DiaryResponse(BaseModel):
     summary: str
     mood: str
     mood_score: int
+
+
+class TranscribeResponse(BaseModel):
+    text: str
 
 
 # ========= FastAPI app =========
@@ -153,10 +167,49 @@ async def chat_audio(
     )
 
 
+@app.post("/api/transcribe", response_model=TranscribeResponse)
+async def transcribe_audio_endpoint(
+    file: UploadFile = File(...),
+):
+    """
+    Audio transcription endpoint (without chat):
+    - Just transcribe audio to text
+    - Used for voice input of diary preferences
+    """
+    try:
+        suffix = Path(file.filename or "").suffix or ".wav"
+    except Exception:
+        suffix = ".wav"
+
+    with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
+        raw = await file.read()
+        tmp.write(raw)
+        tmp_path = tmp.name
+
+    try:
+        text = transcribe_audio(tmp_path)
+    except Exception as e:
+        try:
+            os.unlink(tmp_path)
+        except OSError:
+            pass
+        raise HTTPException(status_code=500, detail=f"Transcription failed: {e}")
+    finally:
+        try:
+            os.unlink(tmp_path)
+        except OSError:
+            pass
+
+    if not text:
+        text = ""
+
+    return TranscribeResponse(text=text)
+
+
 @app.post("/api/generate-diary", response_model=DiaryResponse)
 def generate_diary_endpoint(req: DiaryRequest):
     """
-    Generate a diary entry based on conversation messages.
+    Generate a diary entry based on conversation messages and user preferences.
 
     Input:
         {
@@ -164,7 +217,12 @@ def generate_diary_endpoint(req: DiaryRequest):
                 {"role": "user", "text": "..."},
                 {"role": "ai", "text": "..."},
                 ...
-            ]
+            ],
+            "preferences": {
+                "theme": "daily life",
+                "style": "reflective",
+                "custom_instructions": "Focus on my feelings about..."
+            }
         }
 
     Output:
@@ -179,14 +237,25 @@ def generate_diary_endpoint(req: DiaryRequest):
     if not req.messages or len(req.messages) == 0:
         raise HTTPException(status_code=400, detail="No messages provided")
 
-    # Filter to ensure we have at least some user messages
     user_messages = [m for m in req.messages if m.get("role") == "user"]
     if len(user_messages) == 0:
         raise HTTPException(
             status_code=400, detail="No user messages found in conversation"
         )
 
-    result = generate_diary(req.messages)
+    # Extract preferences
+    theme = None
+    style = None
+    custom_instructions = None
+
+    if req.preferences:
+        theme = req.preferences.theme
+        style = req.preferences.style
+        custom_instructions = req.preferences.custom_instructions
+
+    result = generate_diary(
+        req.messages, theme=theme, style=style, custom_instructions=custom_instructions
+    )
 
     return DiaryResponse(
         title=result["title"],

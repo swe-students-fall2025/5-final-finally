@@ -334,6 +334,41 @@ def add_audio_message(cid):
     )
 
 
+@app.route("/api/transcribe", methods=["POST"])
+def transcribe_audio():
+    """
+    Transcribe audio to text without chat.
+    Used for voice input of diary preferences.
+    """
+    if "user_id" not in session:
+        return jsonify({"error": "Not logged in"}), 401
+
+    file = request.files.get("audio")
+    if file is None or file.filename == "":
+        return jsonify({"error": "No audio file uploaded"}), 400
+
+    text = ""
+
+    try:
+        files = {"file": (file.filename, file.stream, file.mimetype or "audio/wav")}
+
+        r = requests.post(
+            f"{AI_SERVICE_BASE}/api/transcribe",
+            files=files,
+            timeout=60,
+        )
+
+        if r.status_code == 200:
+            data = r.json()
+            text = data.get("text", "")
+        else:
+            print("AI-service transcribe error:", r.status_code, r.text)
+    except Exception as e:
+        print("Error calling ai-service transcribe endpoint:", e)
+
+    return jsonify({"text": text})
+
+
 @app.route("/api/conversations/<cid>/complete", methods=["POST"])
 def complete_conversation(cid):
     if "user_id" not in session:
@@ -356,11 +391,16 @@ def complete_conversation(cid):
     time_str = now.strftime("%H:%M")
 
     msgs = conv.get("messages", [])
-
+    data = request.get_json() or {}
+    preferences = data.get("preferences", None)
     # Try to use AI-generated diary
     try:
+        payload = {"messages": msgs}
+        if preferences:
+            payload["preferences"] = preferences
+
         r = requests.post(
-            f"{AI_SERVICE_BASE}/api/generate-diary", json={"messages": msgs}, timeout=30
+            f"{AI_SERVICE_BASE}/api/generate-diary", json=payload, timeout=30
         )
         if r.status_code == 200:
             ai_diary = r.json()
