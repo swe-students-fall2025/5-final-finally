@@ -23,11 +23,6 @@ body {
     background-size: cover;
 }
 
-
-h2 {
-    margin-top: 0;
-}
-
 .hidden {
     display: none !important;
 }
@@ -99,12 +94,10 @@ h2 {
     transition: 0.25s ease;
 }
 
-
 .primary-btn:hover {
     background: #c8966f;
     transform: scale(1.05);
 }
-
 
 .error-msg {
     background: #b91c1c;
@@ -147,7 +140,6 @@ h2 {
     position: absolute;
     top: 65px;
     left: 300px;
-
     font-family: 'MyFont', sans-serif;
     font-size: 22px;
     font-weight: 500;
@@ -191,7 +183,6 @@ h2 {
     transition: 0.25s ease;
 }
 
-
 .bottom-nav .nav-btn.active {
     background: rgba(255, 255, 255, 0.25);
     font-weight: 600;
@@ -201,11 +192,6 @@ h2 {
     background: #2d3648;
     color: white;
     transform: scale(1.05);
-}
-
-/* ========== switch pages ========== */
-.page-section.hidden {
-    display: none;
 }
 
 /* ========== Chat page ========== */
@@ -228,7 +214,6 @@ h2 {
     box-sizing: border-box;
     overflow-y: auto;
 }
-
 
 .chat-left {
     font-family: 'Font2', sans-serif;
@@ -293,7 +278,6 @@ h2 {
     margin-right: auto;
 }
 
-
 /* ========== recording button ========== */
 .record-controls {
     margin-top: 10px;
@@ -323,8 +307,9 @@ h2 {
 }
 
 #conversation-status {
-    margin-top: 10px;
-    font-size: 14px;
+    font-size: 24px;
+    font-weight: 600;
+    margin-top: 12px;
     color: #6b7280;
 }
 
@@ -354,7 +339,6 @@ h2 {
     font-size: 35px;
     white-space: pre-wrap;
 }
-
 
 /* ========== My Diaries page ========== */
 .diary-search {
@@ -409,7 +393,6 @@ h2 {
     font-size: 20px;
 }
 
-
 #diary-list li:hover {
     background: #f1f5f9;
 }
@@ -421,7 +404,6 @@ h2 {
     font-size: 16px;
     color: #7a7a7a;
 }
-
 
 .diary-item {
     padding: 6px 0 6px 16px;
@@ -465,7 +447,6 @@ h2 {
     margin: 16px 0;
     white-space: pre-wrap;
     line-height: 1.6;
-    
 }
 
 .diary-actions {
@@ -493,9 +474,8 @@ h2 {
     font-size: 30px;
     text-align: center;
     margin-top: 0px;
-    margin-bottom: 10px; 
+    margin-bottom: 10px;
 }
-
 
 #section-diaries {
     overflow: hidden;
@@ -569,9 +549,192 @@ h2 {
     color: #3b2f2f;
 }
 
-#conversation-status {
-    font-size: 24px;
-    font-weight: 600;
-    margin-top: 12px;
+/* ========== Diary Settings modal ========== */
+.modal {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.35);
+    z-index: 50;
+}
+
+.modal-content {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 18px;
+    padding: 20px 24px;
+    min-width: 520px;
+    max-width: 720px;
+    max-height: 80vh;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    font-family: 'Font2', sans-serif;
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.modal-header h3 {
+    font-family: 'MyFont', serif;
+    font-size: 28px;
+    margin: 0;
+    color: #3b2f2f;
+}
+
+.close-btn {
+    border: none;
+    background: transparent;
+    font-size: 28px;
+    cursor: pointer;
+    line-height: 1;
+    padding: 4px 8px;
+    border-radius: 999px;
+    transition: 0.2s ease;
+}
+
+.close-btn:hover {
+    background: #f3e9dd;
+}
+
+.modal-body {
+    overflow-y: auto;
+    padding-right: 4px;
+    margin-bottom: 12px;
+}
+
+.preference-group {
+    margin-bottom: 16px;
+}
+
+.preference-group label {
+    display: block;
+    font-family: 'MyFont', serif;
+    font-size: 20px;
+    margin-bottom: 6px;
+    color: #3b2f2f;
+}
+
+#diary-theme,
+#diary-style,
+#custom-instructions {
+    width: 100%;
+    box-sizing: border-box;
+    border-radius: 10px;
+    border: 1px solid #d8cfc2;
+    padding: 10px 12px;
+    font-size: 16px;
+    font-family: 'Font2', sans-serif;
+    background: rgba(255, 255, 255, 0.95);
+    outline: none;
+    transition: border 0.2s ease, box-shadow 0.2s ease;
+}
+
+#diary-theme:focus,
+#diary-style:focus,
+#custom-instructions:focus {
+    border-color: #bfa48a;
+    box-shadow: 0 0 0 2px rgba(191, 164, 138, 0.2);
+}
+
+#custom-instructions {
+    resize: vertical;
+}
+
+/* 文本 + 语音按钮一行 */
+.custom-input-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.voice-input-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
     color: #6b7280;
+}
+
+.voice-btn {
+    border: none;
+    border-radius: 999px;
+    padding: 6px 10px;
+    background: #f3e9dd;
+    cursor: pointer;
+    font-size: 16px;
+    transition: 0.2s ease;
+}
+
+.voice-btn:hover {
+    background: #e8d8c7;
+    transform: scale(1.05);
+}
+
+#voice-input-status {
+    font-family: 'Font2', sans-serif;
+}
+
+.template-buttons {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.template-btn {
+    border: none;
+    border-radius: 12px;
+    padding: 8px 10px;
+    background: #f9f5ee;
+    font-family: 'Font2', sans-serif;
+    font-size: 14px;
+    text-align: left;
+    cursor: pointer;
+    transition: 0.2s ease;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.template-btn:hover {
+    background: #f3e9dd;
+    transform: translateY(-1px);
+}
+
+.modal-footer {
+    margin-top: 8px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.secondary-btn {
+    font-family: 'MyFont', serif;
+    font-size: 18px;
+    padding: 8px 18px;
+    border-radius: 12px;
+    border: 1px solid #d8cfc2;
+    background: white;
+    color: #3b2f2f;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.secondary-btn:hover {
+    background: #f3f4f6;
+}
+
+.modal-footer .primary-btn {
+    width: auto;
+    min-width: 170px;
+    margin: 0;
+    padding: 8px 20px;
+    font-size: 18px;
 }
