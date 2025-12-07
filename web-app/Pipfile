@@ -7,7 +7,6 @@ name = "pypi"
 flask = "*"
 pymongo = "*"
 coverage = "*"
-pytest = "*"
 pytest-flask = "*"
 black = "*"
 pylint = "*"
@@ -15,7 +14,8 @@ colorama = "*"
 flask-cors = "*"
 requests = "*"
 tzdata = "*"
-
+pytest = "*"
+pytest-cov = "*"
 
 [dev-packages]
 black = "*"
