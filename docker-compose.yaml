@@ -1,0 +1,38 @@
+version: "3.9"
+
+services:
+  mongo:
+    image: mongo:6
+    container_name: mongo
+    restart: always
+    volumes:
+      - mongo-data:/data/db
+    ports:
+      - "27017:27017"
+
+  ai-service:
+    build: ./ai-service
+    container_name: ai-service
+    env_file:
+      - ./ai-service/.env
+    depends_on:
+      - mongo
+    ports:
+      - "8000:8000"
+    environment:
+      - MONGO_URI=mongodb://mongo:27017
+
+  web-app:
+    build: ./web-app
+    container_name: web-app
+    depends_on:
+      - mongo
+      - ai-service
+    ports:
+      - "5001:5000"
+    environment:
+      - MONGO_URI=mongodb://mongo:27017
+      - AI_SERVICE_URL=http://ai-service:8000
+
+volumes:
+  mongo-data:
