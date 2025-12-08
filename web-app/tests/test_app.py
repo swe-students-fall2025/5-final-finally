@@ -3,7 +3,7 @@ from datetime import datetime
 from io import BytesIO
 from bson import ObjectId
 
-import app as webapp 
+import app as webapp
 
 
 # --------- unit test: analyze_mood_and_summary ---------
@@ -65,20 +65,20 @@ def test_start_conversation_requires_login(client):
 
 
 def test_start_conversation_creates_conversation(client, fake_db, login_user):
-    user_id = login_user() 
+    user_id = login_user()
 
     res = client.post("/api/conversations", json={})
     assert res.status_code == 200
     data = res.get_json()
     assert "conversation_id" in data
-    assert data["first_message"] 
+    assert data["first_message"]
 
     conv_oid = ObjectId(data["conversation_id"])
     conv = fake_db.conversations.find_one({"_id": conv_oid})
     assert conv is not None
     assert conv["user_id"] == user_id
     assert conv["status"] == "active"
-    
+
     assert len(conv["messages"]) == 1
     assert conv["messages"][0]["role"] == "ai"
 
@@ -86,12 +86,22 @@ def test_start_conversation_creates_conversation(client, fake_db, login_user):
 # --------- diaries list / detail / edit / delete / search ---------
 
 
-def _insert_diary(fake_db, user_id, date="2025-01-01", time="10:00",
-                  title="Test", content="hello world", mood="neutral"):
+def _insert_diary(
+    fake_db,
+    user_id,
+    date="2025-01-01",
+    time="10:00",
+    title="Test",
+    content="hello world",
+    mood="neutral",
+):
     return fake_db.diaries.insert_one(
         {
             "user_id": user_id,
-            "date": date,
+            "entry_date": date,
+            "created_date": date,
+            "created_time": time,
+            "date": date,  # Keep for backward compatibility
             "time": time,
             "title": title,
             "content": content,
@@ -208,18 +218,12 @@ def test_complete_conversation_uses_fallback_when_ai_service_fails(
     assert res.status_code == 200
     data = res.get_json()
 
+    # Now complete returns preview only, not saved yet
     assert data["mood"] == "neutral"
-    assert data["title"]  
-    assert "day" in data["content"] or "happy" in data["content"]
+    assert data["title"]
+    assert data["conversation_id"] == str(conv_id)
+    assert "suggested_date" in data
 
-    diaries_for_user = [
-        d for d in fake_db.diaries.docs if d["user_id"] == user_id
-    ]
-    assert len(diaries_for_user) == 1
-    assert diaries_for_user[0]["conversation_id"] == conv_id
-
-    conv = fake_db.conversations.find_one({"_id": conv_id})
-    assert conv["status"] == "completed"
 
 def test_root_redirects_to_login(client):
     res = client.get("/", follow_redirects=False)
@@ -339,9 +343,7 @@ def test_transcribe_success(client, login_user, monkeypatch):
     assert res.get_json()["text"] == "hello world"
 
 
-def test_complete_conversation_uses_ai_diary(
-    client, fake_db, login_user, monkeypatch
-):
+def test_complete_conversation_uses_ai_diary(client, fake_db, login_user, monkeypatch):
     user_id = login_user()
 
     cid = fake_db.conversations.insert_one(
@@ -377,6 +379,7 @@ def test_complete_conversation_uses_ai_diary(
 
     monkeypatch.setattr(webapp, "requests", SimpleNamespace(post=fake_post))
 
+    # Step 1: Complete returns preview only
     res = client.post(
         f"/api/conversations/{cid}/complete",
         json={"preferences": {"tone": "casual"}},
@@ -385,11 +388,28 @@ def test_complete_conversation_uses_ai_diary(
     data = res.get_json()
     assert data["title"] == "AI diary title"
     assert data["mood"] == "positive"
+    assert data["conversation_id"] == str(cid)
 
-    diary_id = ObjectId(data["diary_id"])
+    # Step 2: Save the diary
+    res2 = client.post(
+        f"/api/conversations/{cid}/save",
+        json={
+            "title": data["title"],
+            "content": data["content"],
+            "mood": data["mood"],
+            "mood_score": data["mood_score"],
+            "entry_date": data["suggested_date"],
+        },
+    )
+    assert res2.status_code == 200
+    save_data = res2.get_json()
+    assert "diary_id" in save_data
+
+    diary_id = ObjectId(save_data["diary_id"])
     diary = fake_db.diaries.find_one({"_id": diary_id})
     assert diary is not None
     assert diary["title"] == "AI diary title"
+
 
 def test_add_audio_success_branch(client, fake_db, login_user, monkeypatch):
     user_id = login_user()
