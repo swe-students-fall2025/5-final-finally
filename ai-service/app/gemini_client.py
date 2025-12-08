@@ -14,7 +14,7 @@ def generate_cheerful_reply(user_text: str) -> str:
     Reply in a friendly and supportive tone, 1–3 sentences, no emojis.
     """
 
-    model = genai.GenerativeModel("gemini-2.0-flash-lite")
+    model = genai.GenerativeModel("gemini-2.5-flash-lite")
     response = model.generate_content(prompt)
     return response.text.strip()
 
@@ -87,7 +87,7 @@ Respond ONLY with valid JSON in this exact format (no markdown, no extra text):
 {{"title": "Diary Title Here", "content": "Full diary content here...", "summary": "Brief 1-2 sentence summary", "mood": "positive", "mood_score": 2}}
 """
 
-    model = genai.GenerativeModel("gemini-2.0-flash-lite")
+    model = genai.GenerativeModel("gemini-2.5-flash-lite")
     response = model.generate_content(prompt)
 
     # Parse response
