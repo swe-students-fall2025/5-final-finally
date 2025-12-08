@@ -16,6 +16,7 @@ requests = "*"
 tzdata = "*"
 pytest = "*"
 pytest-cov = "*"
+gunicorn = "*"
 
 [dev-packages]
 black = "*"

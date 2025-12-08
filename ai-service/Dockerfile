@@ -16,6 +16,6 @@ RUN pip install --upgrade pip pipenv && \
 
 COPY . .
 
-EXPOSE 5000
+EXPOSE 8000
 
-CMD ["gunicorn", "-b", "0.0.0.0:5000", "app:app"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
