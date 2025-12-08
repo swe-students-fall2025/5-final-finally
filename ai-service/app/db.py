@@ -1,13 +1,20 @@
 from datetime import datetime, timezone
 from pymongo import MongoClient
 from typing import Dict, Any
-
+import os
 
 # ----------------------------------------
-# MongoDB Connection (local development)
+# MongoDB Connection 
 # ----------------------------------------
-MONGO_URI = "mongodb://localhost:27017"
+# Priority:
+#   1. Use MONGO_URI from environment (Docker)
+#   2. Fallback to localhost for local development
+# ----------------------------------------
+
+MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017")
 DB_NAME = "ai_diary"
+
+print(">>> Using MongoDB URI:", MONGO_URI)
 
 client = MongoClient(MONGO_URI)
 db = client[DB_NAME]
@@ -20,13 +27,8 @@ conversations = db["conversations"]
 # Create or get today's active conversation
 # ----------------------------------------
 def create_or_get_conversation(user_id: str) -> Dict[str, Any]:
-    """
-    Retrieves the user's active conversation for today, or creates a new one if none exists.
-    Uses YYYY-MM-DD as the date identifier, which is well-suited for a "one diary entry per day" structure.
-    """
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
-    # Look for an active conversation for the user today
     conv = conversations.find_one({
         "user_id": user_id,
         "date": today,
@@ -36,7 +38,6 @@ def create_or_get_conversation(user_id: str) -> Dict[str, Any]:
     if conv:
         return conv
 
-    # Create a new conversation if none is found
     new_conv = {
         "user_id": user_id,
         "date": today,
@@ -46,19 +47,15 @@ def create_or_get_conversation(user_id: str) -> Dict[str, Any]:
     }
 
     result = conversations.insert_one(new_conv)
-    # Ensure the _id is available in the returned object
     new_conv["_id"] = result.inserted_id
     return new_conv
 
 
+
 # ----------------------------------------
-# Append a message to a conversation
+# Append message to conversation
 # ----------------------------------------
 def append_message(conv_id, role: str, text: str):
-    """
-    Appends a message to a specific conversation.
-    role: "user" or "ai"
-    """
     message = {
         "role": role,
         "text": text,

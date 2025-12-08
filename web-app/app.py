@@ -12,11 +12,14 @@ from pymongo import MongoClient
 from datetime import datetime
 from zoneinfo import ZoneInfo
 import requests
+import os
 
-AI_SERVICE_BASE = "http://localhost:8001"
+AI_SERVICE_BASE = os.environ.get("AI_SERVICE_URL", "http://localhost:8001")
 
-client = MongoClient("mongodb://localhost:27017/")
+MONGO_URI = os.environ.get("MONGO_URI", "mongodb://localhost:27017/")
+client = MongoClient(MONGO_URI)
 db = client["diary_db"]
+
 
 app = Flask(__name__)
 app.secret_key = "dev-secret-key"
