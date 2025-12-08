@@ -5,13 +5,13 @@ verify_ssl = true
 
 [packages]
 fastapi = "*"
-uvicorn = "*"
 pymongo = "*"
 python-multipart = "*"
 pydantic = "*"
 faster-whisper = "*"
 google-generativeai = "*"
 python-dotenv = "*"
+uvicorn = "*"
 
 [dev-packages]
 pytest = "*"
