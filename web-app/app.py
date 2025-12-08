@@ -371,6 +371,7 @@ def transcribe_audio():
 
 @app.route("/api/conversations/<cid>/complete", methods=["POST"])
 def complete_conversation(cid):
+    """Generate diary preview - does NOT save to database."""
     if "user_id" not in session:
         return jsonify({"error": "Not logged in"}), 401
 
@@ -385,15 +386,13 @@ def complete_conversation(cid):
     if str(conv["user_id"]) != session["user_id"]:
         return jsonify({"error": "Forbidden"}), 403
 
-    uid = conv["user_id"]
     now = datetime.now(ZoneInfo("America/New_York"))
-    date_str = now.strftime("%Y-%m-%d")
-    time_str = now.strftime("%H:%M")
+    today_str = now.strftime("%Y-%m-%d")
 
     msgs = conv.get("messages", [])
     data = request.get_json() or {}
     preferences = data.get("preferences", None)
-    # Try to use AI-generated diary
+
     try:
         payload = {"messages": msgs}
         if preferences:
@@ -410,21 +409,8 @@ def complete_conversation(cid):
             mood = ai_diary["mood"]
             mood_score = ai_diary.get("mood_score", 0)
         else:
-            # Fallback to simple analysis
-            print("AI diary generation failed:", r.status_code, r.text)
-            texts = [m["text"] for m in msgs if m.get("role") == "user"]
-            analysis = analyze_mood_and_summary(texts)
-            title = analysis["title"]
-            content = (
-                "\n".join(texts)
-                if texts
-                else "You had a short chat with your AI diary today."
-            )
-            summary = analysis["summary"]
-            mood = analysis["mood"]
-            mood_score = analysis["mood_score"]
+            raise Exception("AI service returned " + str(r.status_code))
     except Exception as e:
-        # Fallback if ai-service is down
         print("Error calling ai-service for diary:", e)
         texts = [m["text"] for m in msgs if m.get("role") == "user"]
         analysis = analyze_mood_and_summary(texts)
@@ -438,13 +424,63 @@ def complete_conversation(cid):
         mood = analysis["mood"]
         mood_score = analysis["mood_score"]
 
+    # Return preview only - NOT saved to database yet
+    return jsonify(
+        {
+            "conversation_id": cid,
+            "title": title,
+            "content": content,
+            "summary": summary,
+            "mood": mood,
+            "mood_score": mood_score,
+            "suggested_date": today_str,
+        }
+    )
+
+
+@app.route("/api/conversations/<cid>/save", methods=["POST"])
+def save_diary(cid):
+    """Save the edited diary to database."""
+    if "user_id" not in session:
+        return jsonify({"error": "Not logged in"}), 401
+
+    try:
+        oid = ObjectId(cid)
+    except Exception:
+        return jsonify({"error": "Invalid id"}), 400
+
+    conv = db.conversations.find_one({"_id": oid})
+    if not conv:
+        return jsonify({"error": "Not found"}), 404
+    if str(conv["user_id"]) != session["user_id"]:
+        return jsonify({"error": "Forbidden"}), 403
+
+    uid = conv["user_id"]
+    now = datetime.now(ZoneInfo("America/New_York"))
+    created_date = now.strftime("%Y-%m-%d")
+    created_time = now.strftime("%H:%M")
+
+    data = request.get_json() or {}
+    title = data.get("title", "Untitled")
+    content = data.get("content", "")
+    mood = data.get("mood", "neutral")
+    mood_score = data.get("mood_score", 0)
+    entry_date = data.get("entry_date", created_date)
+
+    # Validate entry_date format
+    try:
+        datetime.strptime(entry_date, "%Y-%m-%d")
+    except ValueError:
+        entry_date = created_date
+
     diary = {
         "user_id": uid,
-        "date": date_str,
-        "time": time_str,
+        "entry_date": entry_date,
+        "created_date": created_date,
+        "created_time": created_time,
         "title": title,
         "content": content,
-        "summary": summary,
+        "summary": content[:200] if content else "",
         "mood": mood,
         "mood_score": mood_score,
         "created_at": now,
@@ -458,13 +494,13 @@ def complete_conversation(cid):
     return jsonify(
         {
             "diary_id": str(new_id),
-            "date": diary["date"],
-            "time": diary["time"],
-            "title": diary["title"],
-            "content": diary["content"],
-            "summary": diary["summary"],
-            "mood": diary["mood"],
-            "mood_score": diary["mood_score"],
+            "entry_date": entry_date,
+            "created_date": created_date,
+            "created_time": created_time,
+            "title": title,
+            "content": content,
+            "mood": mood,
+            "mood_score": mood_score,
         }
     )
 
@@ -472,6 +508,64 @@ def complete_conversation(cid):
 # ----------------------------
 # Diaries: list / detail / search / edit / delete
 # ----------------------------
+@app.route("/api/users/<uid>/diaries/calendar")
+def get_calendar_diaries(uid):
+    """Get diaries grouped by date for calendar view."""
+    if "user_id" not in session or session["user_id"] != uid:
+        return jsonify({"error": "Forbidden"}), 403
+
+    year = request.args.get("year", type=int)
+    month = request.args.get("month", type=int)
+
+    if not year or not month:
+        now = datetime.now(ZoneInfo("America/New_York"))
+        year = year or now.year
+        month = month or now.month
+
+    # Build date range for the month
+    start_date = f"{year}-{month:02d}-01"
+    if month == 12:
+        end_date = f"{year + 1}-01-01"
+    else:
+        end_date = f"{year}-{month + 1:02d}-01"
+
+    # Query diaries for this month
+    cur = db.diaries.find(
+        {
+            "user_id": ObjectId(uid),
+            "$or": [
+                {"entry_date": {"$gte": start_date, "$lt": end_date}},
+                {"date": {"$gte": start_date, "$lt": end_date}},
+            ],
+        }
+    )
+
+    diaries_by_date = {}
+    for d in cur:
+        # Support both old (date) and new (entry_date) format
+        entry_date = d.get("entry_date") or d.get("date")
+        if not entry_date:
+            continue
+
+        if entry_date not in diaries_by_date:
+            diaries_by_date[entry_date] = []
+
+        diaries_by_date[entry_date].append(
+            {
+                "diary_id": str(d["_id"]),
+                "title": d.get("title", ""),
+                "mood": d.get("mood", "neutral"),
+                "preview": d.get("summary") or d.get("content", "")[:80],
+            }
+        )
+
+    return jsonify(
+        {
+            "year": year,
+            "month": month,
+            "diaries_by_date": diaries_by_date,
+        }
+    )
 
 
 @app.route("/api/users/<uid>/diaries")
@@ -485,17 +579,22 @@ def list_diaries(uid):
 
     cur = (
         db.diaries.find({"user_id": ObjectId(uid)})
-        .sort("date", -1)
+        .sort("entry_date", -1)
         .skip(skip)
         .limit(limit)
     )
 
     arr = []
     for d in cur:
+        # Support both old and new date format
+        entry_date = d.get("entry_date") or d.get("date")
+        created_time = d.get("created_time") or d.get("time")
+
         arr.append(
             {
                 "diary_id": str(d["_id"]),
-                "date": d.get("date"),
+                "entry_date": entry_date,
+                "created_time": created_time,
                 "title": d.get("title"),
                 "preview": d.get("summary") or d.get("content", "")[:80],
                 "mood": d.get("mood", "neutral"),
@@ -525,13 +624,19 @@ def diary_detail(diary_id):
     if not doc:
         return jsonify({"error": "Not found"}), 404
 
+    # Support both old and new date format
+    entry_date = doc.get("entry_date") or doc.get("date")
+    created_date = doc.get("created_date") or doc.get("date")
+    created_time = doc.get("created_time") or doc.get("time")
+
     # GET
     if request.method == "GET":
         return jsonify(
             {
                 "diary_id": str(doc["_id"]),
-                "date": doc.get("date"),
-                "time": doc.get("time"),
+                "entry_date": entry_date,
+                "created_date": created_date,
+                "created_time": created_time,
                 "title": doc.get("title"),
                 "content": doc.get("content", ""),
                 "summary": doc.get("summary", ""),
@@ -543,16 +648,34 @@ def diary_detail(diary_id):
     # PUT update
     if request.method == "PUT":
         data = request.get_json() or {}
-        new_content = data.get("content")
-        if new_content is not None:
-            db.diaries.update_one({"_id": oid}, {"$set": {"content": new_content}})
-            doc["content"] = new_content
+        update_fields = {}
+
+        if "content" in data:
+            update_fields["content"] = data["content"]
+        if "title" in data:
+            update_fields["title"] = data["title"]
+        if "entry_date" in data:
+            update_fields["entry_date"] = data["entry_date"]
+        if "mood" in data:
+            update_fields["mood"] = data["mood"]
+        if "mood_score" in data:
+            update_fields["mood_score"] = data["mood_score"]
+
+        if update_fields:
+            db.diaries.update_one({"_id": oid}, {"$set": update_fields})
+            doc.update(update_fields)
+
+        # Re-fetch for response
+        entry_date = doc.get("entry_date") or doc.get("date")
+        created_date = doc.get("created_date") or doc.get("date")
+        created_time = doc.get("created_time") or doc.get("time")
 
         return jsonify(
             {
                 "diary_id": str(doc["_id"]),
-                "date": doc.get("date"),
-                "time": doc.get("time"),
+                "entry_date": entry_date,
+                "created_date": created_date,
+                "created_time": created_time,
                 "title": doc.get("title"),
                 "content": doc.get("content", ""),
                 "summary": doc.get("summary", ""),

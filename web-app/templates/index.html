@@ -35,14 +35,43 @@
                     </div>
                 </div>
 
-                <div class="chat-right hidden" id="diary-preview-box">
-                    <h4>Today&apos;s Diary (preview)</h4>
-                    <article id="diary-detail-chat" class="diary-preview">
-                        <h5 id="diary-title-chat"></h5>
-                        <p id="diary-date-chat"></p>
-                        <p id="diary-mood-chat"></p>
-                        <p id="diary-content-chat"></p>
-                    </article>
+                <div class="chat-right hidden" id="diary-edit-box">
+                    <h4>Edit Your Diary</h4>
+                    
+                    <div class="edit-group">
+                        <label for="edit-diary-date">Date (what day is this diary about?)</label>
+                        <input type="date" id="edit-diary-date" class="edit-input">
+                    </div>
+
+                    <div class="edit-group">
+                        <label for="edit-diary-title">Title</label>
+                        <input type="text" id="edit-diary-title" class="edit-input" placeholder="Enter diary title...">
+                    </div>
+
+                    <div class="edit-group">
+                        <label for="edit-diary-mood">Mood</label>
+                        <select id="edit-diary-mood" class="edit-select">
+                            <option value="positive">😄 Positive</option>
+                            <option value="neutral">😐 Neutral</option>
+                            <option value="negative">😔 Negative</option>
+                        </select>
+                    </div>
+
+                    <div class="edit-group">
+                        <label for="edit-diary-content">Content</label>
+                        <textarea id="edit-diary-content" class="edit-textarea" rows="8" placeholder="Your diary content..."></textarea>
+                    </div>
+
+                    <div class="regenerate-section">
+                        <label for="regenerate-instructions">Want changes? Add instructions and regenerate:</label>
+                        <input type="text" id="regenerate-instructions" class="edit-input" placeholder="e.g., Make it more reflective...">
+                        <button id="regenerate-btn" class="secondary-btn">🔄 Regenerate</button>
+                    </div>
+
+                    <div class="diary-edit-actions">
+                        <button id="discard-diary-btn" class="secondary-btn">Discard</button>
+                        <button id="save-diary-btn" class="primary-btn">💾 Save Diary</button>
+                    </div>
                 </div>
             </div>
         </section>
@@ -131,17 +160,35 @@
                 <input id="diary-search-input" placeholder="Search by keyword..." />
                 <button id="diary-search-btn">Search</button>
                 <button id="diary-search-clear-btn">Clear</button>
-                <button id="load-diaries-btn">Reload Diaries</button>
+                <button id="load-diaries-btn">Reload</button>
             </div>
 
-            
+            <!-- Calendar View -->
+            <div class="calendar-container">
+                <div class="calendar-nav">
+                    <button id="prev-month-btn">◀</button>
+                    <span id="calendar-title">December 2025</span>
+                    <button id="next-month-btn">▶</button>
+                    <button id="today-btn">Today</button>
+                </div>
+                <div id="calendar-grid" class="calendar-grid"></div>
+            </div>
+
+            <!-- Diaries for selected date -->
+            <div class="calendar-diary-section">
+                <h4>Diaries for Selected Date</h4>
+                <ul id="calendar-diary-list"></ul>
+            </div>
+
+            <hr class="section-divider">
+
             <div class="diary-layout">
                 <ul id="diary-list"></ul>
 
                 <article id="diary-detail" class="diary-detail">
                     <h4 id="diary-title"></h4>
-                    <p id="diary-date"></p> 
-                    <p id="diary-time"></p> 
+                    <p id="diary-entry-date" class="diary-entry-date"></p>
+                    <p id="diary-created-info" class="diary-created-info"></p>
                     <p id="diary-mood"></p>
                     <p id="diary-content"></p>
 
