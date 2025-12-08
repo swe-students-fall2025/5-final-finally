@@ -738,3 +738,286 @@ body {
     padding: 8px 20px;
     font-size: 18px;
 }
+
+
+
+/* ========== Edit Panel Styles ========== */
+.chat-right h4 {
+    font-family: 'MyFont', sans-serif;
+    font-size: 28px;
+    margin-top: 0;
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+.edit-group {
+    margin-bottom: 14px;
+}
+
+.edit-group label {
+    display: block;
+    font-family: 'MyFont', serif;
+    font-size: 16px;
+    margin-bottom: 4px;
+    color: #3b2f2f;
+}
+
+.edit-input,
+.edit-select {
+    width: 100%;
+    box-sizing: border-box;
+    border-radius: 8px;
+    border: 1px solid #d8cfc2;
+    padding: 10px 12px;
+    font-size: 15px;
+    font-family: 'Font2', sans-serif;
+    background: rgba(255, 255, 255, 0.95);
+    outline: none;
+    transition: border 0.2s ease;
+}
+
+.edit-input:focus,
+.edit-select:focus,
+.edit-textarea:focus {
+    border-color: #bfa48a;
+}
+
+.edit-textarea {
+    width: 100%;
+    box-sizing: border-box;
+    border-radius: 8px;
+    border: 1px solid #d8cfc2;
+    padding: 10px 12px;
+    font-size: 15px;
+    font-family: 'Font2', sans-serif;
+    background: rgba(255, 255, 255, 0.95);
+    outline: none;
+    resize: vertical;
+    min-height: 120px;
+}
+
+.regenerate-section {
+    margin-top: 16px;
+    padding: 12px;
+    background: #faf8f5;
+    border: 1px dashed #d8cfc2;
+    border-radius: 10px;
+}
+
+.regenerate-section label {
+    display: block;
+    font-family: 'MyFont', serif;
+    font-size: 14px;
+    margin-bottom: 6px;
+    color: #6b7280;
+}
+
+.regenerate-section .edit-input {
+    margin-bottom: 8px;
+}
+
+.regenerate-section .secondary-btn {
+    width: 100%;
+}
+
+.diary-edit-actions {
+    margin-top: 16px;
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.diary-edit-actions .secondary-btn {
+    flex: 1;
+}
+
+.diary-edit-actions .primary-btn {
+    flex: 2;
+    margin: 0;
+    width: auto;
+}
+
+/* ========== Calendar Styles ========== */
+.calendar-container {
+    background: white;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.calendar-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.calendar-nav button {
+    font-family: 'MyFont', serif;
+    font-size: 16px;
+    padding: 6px 14px;
+    border-radius: 8px;
+    background: #f3e9dd;
+    border: none;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.calendar-nav button:hover {
+    background: #e8d8c7;
+    transform: scale(1.05);
+}
+
+#calendar-title {
+    font-family: 'Font2', serif;
+    font-size: 22px;
+    font-weight: 600;
+    color: #3b2f2f;
+    min-width: 180px;
+    text-align: center;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+}
+
+.calendar-header {
+    text-align: center;
+    font-family: 'Font2', serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: #6b7280;
+    padding: 8px 0;
+}
+
+.calendar-day {
+    position: relative;
+    text-align: center;
+    padding: 10px 4px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Font2', sans-serif;
+    font-size: 15px;
+    transition: 0.2s ease;
+    background: #fafafa;
+}
+
+.calendar-day:hover:not(.empty) {
+    background: #f0ebe5;
+    transform: scale(1.05);
+}
+
+.calendar-day.empty {
+    background: transparent;
+    cursor: default;
+}
+
+.calendar-day.today {
+    border: 2px solid #d8a87b;
+    font-weight: 600;
+}
+
+.calendar-day.has-diary {
+    background: #e8f5e9;
+    font-weight: 600;
+}
+
+.calendar-day.mood-positive {
+    background: #c8e6c9;
+}
+
+.calendar-day.mood-negative {
+    background: #ffcdd2;
+}
+
+.calendar-day.selected {
+    background: #d8a87b !important;
+    color: white;
+}
+
+.diary-count-badge {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    background: #d8a87b;
+    color: white;
+    font-size: 10px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Calendar diary list */
+.calendar-diary-section {
+    background: white;
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+}
+
+.calendar-diary-section h4 {
+    font-family: 'MyFont', serif;
+    font-size: 18px;
+    margin: 0 0 8px 0;
+    color: #3b2f2f;
+}
+
+#calendar-diary-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    max-height: 120px;
+    overflow-y: auto;
+}
+
+#calendar-diary-list li {
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: 'Font2', sans-serif;
+    font-size: 14px;
+    transition: 0.2s ease;
+}
+
+#calendar-diary-list li:hover {
+    background: #f3e9dd;
+}
+
+#calendar-diary-list li.no-diary {
+    color: #9ca3af;
+    cursor: default;
+}
+
+#calendar-diary-list li.no-diary:hover {
+    background: transparent;
+}
+
+.section-divider {
+    border: none;
+    border-top: 1px solid #e5e7eb;
+    margin: 16px 0;
+}
+
+/* Diary detail date styles */
+.diary-entry-date {
+    font-family: 'Font2', sans-serif;
+    font-size: 22px;
+    color: #3b2f2f;
+    margin: 4px 0;
+    text-align: right;
+}
+
+.diary-created-info {
+    font-family: 'Font2', sans-serif;
+    font-size: 14px;
+    color: #9ca3af;
+    margin: 2px 0 12px 0;
+    text-align: right;
+}
