@@ -31,7 +31,8 @@ jobs:
         run: |
           pip install pipenv
           pipenv install --deploy --ignore-pipfile
-          pipenv install --dev pytest pytest-cov
+          pipenv install --dev pytest pytest-cov coverage
+
 
       # --- Run tests + coverage ---
       - name: Run pytest with coverage
@@ -43,7 +44,7 @@ jobs:
       - name: Check coverage threshold
         working-directory: ai-service
         run: |
-          coverage report --fail-under=80
+          pipenv run coverage report --fail-under=80
 
       # --- Build Docker image ---
       - name: Build Docker image
