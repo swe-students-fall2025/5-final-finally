@@ -719,8 +719,6 @@ async function loadDiaryDetail(diaryId) {
         }
         if (moodEl) moodEl.textContent = moodToEmoji(data.mood);
 
-        if (moodEl) moodEl.textContent = moodToEmoji(data.mood);
-        
         currentDiaryId = diaryId;
 
         const actions = document.querySelector(".diary-actions");
@@ -819,20 +817,11 @@ function renderCalendar() {
             // Add mood indicator
             const diaries = calendarDiaries[dateStr];
             const moods = diaries.map(d => d.mood);
-            let moodEmoji = "😐"; // Default neutral
-            
             if (moods.includes("positive")) {
-                moodEmoji = "😄";
                 cell.classList.add("mood-positive");
             } else if (moods.includes("negative")) {
-                moodEmoji = "😔";
                 cell.classList.add("mood-negative");
             }
-
-            const emojiSpan = document.createElement("div");
-            emojiSpan.className = "calendar-emoji";
-            emojiSpan.textContent = moodEmoji;
-            cell.appendChild(emojiSpan);
 
             // Add count badge if multiple
             if (diaries.length > 1) {
