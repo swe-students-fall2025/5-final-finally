@@ -1,8 +1,14 @@
 /* ========== GLOBAL VARIABLES & RESET ========== */
 :root {
-    --font-title: 'Cinzel Decorative', cursive;
-    --font-header: 'Cinzel', serif;
-    --font-body: 'Fauna One', serif;
+    /* Readable Medieval Fonts */
+    --font-title: 'MedievalSharp', cursive;
+    /* Replaced Uncial with clearer MedievalSharp */
+    --font-header: 'Cinzel Decorative', serif;
+    /* Ornate but readable */
+    --font-body: 'IM Fell English', serif;
+    /* The classic old-print look */
+    --font-hand: 'IM Fell English', serif;
+    /* Used for content now, much clearer than script */
 
     --bg-parchment: #f0e6d2;
     --bg-paper: #fdfaf5;
@@ -19,17 +25,63 @@
     --color-danger: #8a1c1c;
     /* Wax Red */
 
-    --border-ink: #8d6e63;
+    --border-ink: #5d4037;
     --shadow-paper: 0 4px 20px rgba(44, 24, 16, 0.15);
-    --shadow-deep: 0 10px 30px rgba(44, 24, 16, 0.25);
+    --shadow-deep: 0 10px 30px rgba(44, 24, 16, 0.4);
 
     --radius-sm: 4px;
     --radius-md: 8px;
     --radius-lg: 16px;
+
+    /* Book colors */
+    --book-cover: #3e2723;
+    --page-bg: #fffbf0;
+}
+
+/* Page Flip Animations */
+@keyframes turnPage {
+    0% {
+        transform: rotateY(0deg);
+        transform-origin: left;
+        opacity: 1;
+    }
+
+    50% {
+        transform: rotateY(-90deg);
+        transform-origin: left;
+        opacity: 0.5;
+    }
+
+    100% {
+        transform: rotateY(0deg);
+        transform-origin: left;
+        opacity: 1;
+    }
+}
+
+@keyframes appearIn {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.turning {
+    animation: turnPage 0.6s ease-in-out;
+}
+
+.fade-in {
+    animation: appearIn 0.4s ease-out;
 }
 
 body {
     font-family: var(--font-body);
+    /* Key change: Default to readable body font */
     color: var(--text-ink);
     background-color: var(--bg-parchment);
     /* Subtle paper texture pattern could be added here if available */
@@ -324,10 +376,13 @@ button {
 .chat-layout {
     display: flex;
     width: 100%;
-    max-width: 1200px;
+    max-width: 1300px;
+    /* Wider container */
     gap: 30px;
-    height: calc(100vh - 200px);
-    /* Fill remaining space */
+    height: calc(100vh - 180px);
+    /* Slightly taller */
+    padding: 0 20px;
+    box-sizing: border-box;
 }
 
 /* Common container style */
@@ -336,8 +391,9 @@ button {
     background: var(--bg-paper);
     padding: 25px;
     border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-paper);
-    border: 1px solid #dcdcdc;
+    box-shadow: var(--shadow-deep);
+    border: 3px double var(--border-ink);
+    /* Medieval border */
     display: flex;
     flex-direction: column;
     position: relative;
@@ -346,15 +402,8 @@ button {
 /* Make them look like pages */
 .chat-left::before,
 .chat-right::before {
-    content: '';
-    position: absolute;
-    top: 5px;
-    left: 5px;
-    right: 5px;
-    bottom: 5px;
-    border: 1px solid rgba(139, 69, 19, 0.2);
-    border-radius: 12px;
-    pointer-events: none;
+    content: none;
+    /* Remove duplicate internal border if we have the double border */
 }
 
 .chat-left {
@@ -364,14 +413,14 @@ button {
 .chat-left.full-width {
     flex: 1;
     /* Center it when alone */
-    max-width: 800px;
+    max-width: 1000px;
+    /* Much Wider chat when alone */
     margin: 0 auto;
 }
 
 .chat-right {
     flex: 1.2;
-    border-left: 4px double var(--border-ink);
-    /* Separator look */
+    border-left: 3px double var(--border-ink);
 }
 
 .conversation-box {
@@ -514,49 +563,66 @@ button {
 
 
 /* ========== DIARY LIST & CALENDAR ========== */
+/* ========== DIARY LIST & CALENDAR ========== */
 .calendar-container {
     background: var(--bg-paper);
-    padding: 20px;
+    padding: 15px;
+    /* Reduced padding */
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-paper);
     margin-bottom: 20px;
-    border: 1px solid #dcdcdc;
+    border: 3px double var(--border-ink);
+    /* Medieval touch */
+    max-width: 450px;
+    /* Reduced size */
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .calendar-nav {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
 }
 
 #calendar-title {
     font-family: var(--font-header);
-    font-size: 24px;
+    font-size: 20px;
+    /* Smaller title */
     font-weight: bold;
+    color: var(--color-primary);
 }
 
 .calendar-nav button {
     background: transparent;
     border: 1px solid var(--border-ink);
     border-radius: 50%;
-    width: 32px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
     cursor: pointer;
     font-size: 14px;
+    color: var(--text-ink);
+    transition: 0.2s;
+}
+
+.calendar-nav button:hover {
+    background: var(--color-accent);
+    color: white;
 }
 
 #today-btn {
     border-radius: 20px;
     width: auto;
-    padding: 0 15px;
+    padding: 0 12px;
 }
 
 .calendar-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: 8px;
-    margin-top: 10px;
+    gap: 4px;
+    /* Tighter gap */
+    margin-top: 5px;
 }
 
 .calendar-header {
@@ -564,8 +630,8 @@ button {
     font-family: var(--font-header);
     font-weight: bold;
     color: var(--text-dim);
-    font-size: 14px;
-    padding-bottom: 5px;
+    font-size: 12px;
+    padding-bottom: 2px;
     border-bottom: 1px solid #e0e0e0;
 }
 
@@ -574,13 +640,15 @@ button {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
+    /* Align to top to fit emoji */
+    padding-top: 4px;
     border-radius: var(--radius-sm);
     cursor: pointer;
     font-family: var(--font-body);
+    font-size: 14px;
     background: white;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-    /* Card-like */
     transition: 0.2s;
     position: relative;
     border: 1px solid transparent;
@@ -588,13 +656,15 @@ button {
 
 .calendar-day:hover {
     background: #efebe9;
-    transform: translateY(-2px);
-    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    z-index: 2;
 }
 
 .calendar-day.today {
     border: 2px solid var(--color-accent);
     font-weight: bold;
+    background: #fff8e1;
 }
 
 .calendar-day.selected {
@@ -603,44 +673,31 @@ button {
     border-color: var(--color-primary);
 }
 
-.calendar-day.has-diary::after {
-    content: '';
-    width: 6px;
-    height: 6px;
-    background: var(--text-dim);
-    border-radius: 50%;
+.calendar-emoji {
+    font-size: 16px;
     margin-top: 2px;
+    line-height: 1;
 }
 
-.calendar-day.mood-positive::after {
-    background: #2e7d32;
-    /* Green ink */
-}
-
-.calendar-day.mood-negative::after {
-    background: #c62828;
-    /* Red ink */
-}
-
-.calendar-day.empty {
-    background: transparent;
-    cursor: default;
-    box-shadow: none;
+/* Hide the old dot */
+.calendar-day.has-diary::after {
+    display: none;
 }
 
 .diary-count-badge {
     position: absolute;
     top: -4px;
     right: -4px;
-    background: var(--color-accent);
+    background: var(--color-danger);
     color: white;
-    font-size: 10px;
-    width: 16px;
-    height: 16px;
+    font-size: 9px;
+    width: 14px;
+    height: 14px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 
