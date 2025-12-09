@@ -1,4 +1,9 @@
 # Final Project
+[![Deploy to DigitalOcean](https://github.com/swe-students-fall2025/5-final-finally/actions/workflows/deploy.yml/badge.svg)](https://github.com/swe-students-fall2025/5-final-finally/actions/workflows/deploy.yml)
+[![AI Service CI (Tests Only)](https://github.com/swe-students-fall2025/5-final-finally/actions/workflows/ai-service-ci.yml/badge.svg)](https://github.com/swe-students-fall2025/5-final-finally/actions/workflows/ai-service-ci.yml)
+[![AI Service Release (Build & Push)](https://github.com/swe-students-fall2025/5-final-finally/actions/workflows/ai-service-release.yml/badge.svg)](https://github.com/swe-students-fall2025/5-final-finally/actions/workflows/ai-service-release.yml)
+[![Web App CI (Tests Only)](https://github.com/swe-students-fall2025/5-final-finally/actions/workflows/web-app-ci.yml/badge.svg)](https://github.com/swe-students-fall2025/5-final-finally/actions/workflows/web-app-ci.yml)
+[![Web App Release (Build & Push)](https://github.com/swe-students-fall2025/5-final-finally/actions/workflows/web-app-release.yml/badge.svg)](https://github.com/swe-students-fall2025/5-final-finally/actions/workflows/web-app-release.yml)
 
 An exercise to put to practice software development teamwork, subsystem communication, containers, deployment, and CI/CD pipelines. See [instructions](./instructions.md) for details.
 
