@@ -34,11 +34,50 @@ class FakeCollection:
 
     # ---- helpers ----
     def _match_simple(self, doc, key, value):
-        if isinstance(value, dict) and "$regex" in value:
-            pattern = value["$regex"]
-            flags = re.IGNORECASE if value.get("$options") == "i" else 0
-            reg = re.compile(pattern, flags)
-            return bool(reg.search(doc.get(key, "") or ""))
+        # Handle comparison operators
+        if isinstance(value, dict):
+            doc_val = doc.get(key)
+            
+            # Handle regex
+            if "$regex" in value:
+                pattern = value["$regex"]
+                flags = re.IGNORECASE if value.get("$options") == "i" else 0
+                reg = re.compile(pattern, flags)
+                return bool(reg.search(doc_val or ""))
+            
+            # Handle comparison operators
+            if "$gte" in value:
+                if doc_val is None:
+                    return False
+                if doc_val < value["$gte"]:
+                    return False
+            
+            if "$gt" in value:
+                if doc_val is None:
+                    return False
+                if doc_val <= value["$gt"]:
+                    return False
+            
+            if "$lte" in value:
+                if doc_val is None:
+                    return False
+                if doc_val > value["$lte"]:
+                    return False
+            
+            if "$lt" in value:
+                if doc_val is None:
+                    return False
+                if doc_val >= value["$lt"]:
+                    return False
+            
+            if "$ne" in value:
+                if doc_val == value["$ne"]:
+                    return False
+            
+            # If we had operators and all passed
+            if any(op in value for op in ["$gte", "$gt", "$lte", "$lt", "$ne"]):
+                return True
+        
         return doc.get(key) == value
 
     def _matches_filter(self, doc, flt):
@@ -128,8 +167,8 @@ def client(app):
 @pytest.fixture
 def login_user(client, fake_db):
     """
-    返回一个 helper: login(username, password) -> user_id(ObjectId)
-    通过真正走 /login 路由创建用户和 session。
+    return helper: login(username, password) -> user_id(ObjectId)
+
     """
 
     def _login(username="alice", password="pw"):
