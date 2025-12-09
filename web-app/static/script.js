@@ -721,21 +721,6 @@ async function loadDiaryDetail(diaryId) {
 
         if (moodEl) moodEl.textContent = moodToEmoji(data.mood);
         
-        // Animation
-        const diaryPage = document.querySelector('.diary-detail');
-        if (diaryPage) {
-            diaryPage.classList.remove('turning');
-            void diaryPage.offsetWidth; // Trigger reflow
-            diaryPage.classList.add('turning');
-        }
-        
-        // Content fade in
-        if (contentEl) {
-            contentEl.classList.remove('fade-in');
-            void contentEl.offsetWidth;
-            contentEl.classList.add('fade-in');
-        }
-
         currentDiaryId = diaryId;
 
         const actions = document.querySelector(".diary-actions");

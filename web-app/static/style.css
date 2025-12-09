@@ -38,46 +38,7 @@
     --page-bg: #fffbf0;
 }
 
-/* Page Flip Animations */
-@keyframes turnPage {
-    0% {
-        transform: rotateY(0deg);
-        transform-origin: left;
-        opacity: 1;
-    }
-
-    50% {
-        transform: rotateY(-90deg);
-        transform-origin: left;
-        opacity: 0.5;
-    }
-
-    100% {
-        transform: rotateY(0deg);
-        transform-origin: left;
-        opacity: 1;
-    }
-}
-
-@keyframes appearIn {
-    from {
-        opacity: 0;
-        transform: translateY(5px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.turning {
-    animation: turnPage 0.6s ease-in-out;
-}
-
-.fade-in {
-    animation: appearIn 0.4s ease-out;
-}
+/* Page Flip Animations Removed */
 
 body {
     font-family: var(--font-body);
@@ -145,11 +106,14 @@ button {
 
 .app-main {
     flex: 1;
+    display: flex;
+    flex-direction: column;
     overflow-y: auto;
     padding-bottom: 70px;
     /* Space for bottom nav */
     position: relative;
-    max-width: 1400px;
+    max-width: 95%;
+    /* Bigger width */
     margin: 0 auto;
     width: 100%;
     box-sizing: border-box;
@@ -157,7 +121,9 @@ button {
 
 .page-section {
     padding: 20px;
-    height: 100%;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
     box-sizing: border-box;
     animation: fadeIn 0.5s ease;
 }
@@ -350,8 +316,6 @@ button {
 
 /* ========== CHAT SECTION ========== */
 #section-chat {
-    display: flex;
-    flex-direction: column;
     align-items: center;
 }
 
@@ -375,14 +339,19 @@ button {
 
 .chat-layout {
     display: flex;
+    flex: 1;
+    /* Grow to fill section */
     width: 100%;
-    max-width: 1300px;
-    /* Wider container */
+    max-width: 1600px;
+    /* Bigger layout */
     gap: 30px;
-    height: calc(100vh - 180px);
-    /* Slightly taller */
-    padding: 0 20px;
+    height: auto;
+    /* Let flex handle it */
+    min-height: 0;
+    /* Important for scroll */
+    padding: 0 20px 20px 20px;
     box-sizing: border-box;
+    margin-bottom: 10px;
 }
 
 /* Common container style */
@@ -703,9 +672,13 @@ button {
 
 .diary-layout {
     display: grid;
-    grid-template-columns: 300px 1fr;
-    gap: 20px;
-    height: 500px;
+    grid-template-columns: 350px 1fr;
+    gap: 30px;
+    flex: 1;
+    width: 100%;
+    max-width: 1600px;
+    margin: 0 auto;
+    min-height: 0;
 }
 
 #diary-list {
