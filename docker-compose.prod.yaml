@@ -1,0 +1,36 @@
+version: "3.9"
+
+services:
+  mongo:
+    image: mongo:6
+    container_name: mongo
+    restart: always
+    volumes:
+      - mongo-data:/data/db
+
+  ai-service:
+    image: ${DOCKER_USERNAME}/ai-service:latest
+    container_name: ai-service
+    restart: always
+    depends_on:
+      - mongo
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - MONGO_URL=mongodb://mongo:27017/
+      - MONGO_URI=mongodb://mongo:27017
+
+  web-app:
+    image: ${DOCKER_USERNAME}/web-app:latest
+    container_name: web-app
+    restart: always
+    depends_on:
+      - mongo
+      - ai-service
+    ports:
+      - "80:5000"
+    environment:
+      - MONGO_URI=mongodb://mongo:27017
+      - AI_SERVICE_URL=http://ai-service:8000
+
+volumes:
+  mongo-data:
