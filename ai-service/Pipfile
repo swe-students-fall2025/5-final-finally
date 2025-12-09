@@ -15,6 +15,7 @@ uvicorn = "*"
 
 [dev-packages]
 pytest = "*"
+pytest-cov = "*"
 coverage = "*"
 
 [requires]
