@@ -29,11 +29,11 @@ jobs:
           pip install pipenv
 
       - name: Install dependencies
-        working-directory: web-app
         run: |
+          cd web-app
           pipenv install --dev
 
-      - name: Run tests with coverage
-        working-directory: web-app
+      - name: Run pytest with coverage
         run: |
+          cd web-app
           pipenv run pytest --cov=app --cov-report=term-missing --cov-fail-under=80
