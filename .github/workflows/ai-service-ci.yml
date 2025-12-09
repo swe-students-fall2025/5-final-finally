@@ -1,0 +1,39 @@
+name: AI Service CI (Tests Only)
+
+on:
+  push:
+    paths:
+      - "ai-service/**"
+      - ".github/workflows/ai-service-ci.yml"
+  pull_request:
+    paths:
+      - "ai-service/**"
+      - ".github/workflows/ai-service-ci.yml"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install pipenv
+        run: |
+          python -m pip install --upgrade pip
+          pip install pipenv
+
+      - name: Install dependencies
+        run: |
+          cd ai-service
+          pipenv install --dev
+
+      - name: Run pytest with coverage
+        run: |
+          cd ai-service
+          pipenv run pytest --cov=app --cov-report=term-missing --cov-fail-under=80

@@ -23,5 +23,6 @@ black = "*"
 pylint = "*"
 pytest-cov = "*"
 
+
 [requires]
 python_version = "3.10"
