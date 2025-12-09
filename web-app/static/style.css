@@ -1,949 +1,638 @@
-/* ========== font ========== */
-@font-face {
-    font-family: 'MyFont';
-    src: url('/static/MyFont.otf');
-    font-weight: normal;
-    font-style: normal;
+/* ========== GLOBAL VARIABLES & RESET ========== */
+:root {
+    --font-title: 'Cinzel Decorative', cursive;
+    --font-header: 'Cinzel', serif;
+    --font-body: 'Fauna One', serif;
+
+    --bg-parchment: #f0e6d2;
+    --bg-paper: #fdfaf5;
+    --bg-overlay: rgba(253, 250, 245, 0.95);
+
+    --text-ink: #2c1810;
+    --text-dim: #5d4037;
+
+    --color-primary: #8b4513;
+    /* Saddle Brown */
+    --color-primary-hover: #a0522d;
+    --color-accent: #cca43b;
+    /* Muted Gold */
+    --color-danger: #8a1c1c;
+    /* Wax Red */
+
+    --border-ink: #8d6e63;
+    --shadow-paper: 0 4px 20px rgba(44, 24, 16, 0.15);
+    --shadow-deep: 0 10px 30px rgba(44, 24, 16, 0.25);
+
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 16px;
 }
 
-@font-face {
-    font-family: 'Font2';
-    src: url('/static/Font2.otf');
-    font-weight: normal;
-    font-style: normal;
-}
-
-/* ========== layout for all ========== */
 body {
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: var(--font-body);
+    color: var(--text-ink);
+    background-color: var(--bg-parchment);
+    /* Subtle paper texture pattern could be added here if available */
+    /* background-image: url('/static/bgImage.png'); */
+    /* Keeping original linking if valid, but overriding style */
+    background-size: cover;
+    background-attachment: fixed;
     margin: 0;
     padding: 0;
-    background: url('/static/indexImage.png') no-repeat center center / cover;
-    background-attachment: fixed;
-    background-size: cover;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+    /* App-like feel */
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: var(--font-header);
+    color: var(--text-ink);
+    margin-top: 0;
+    font-weight: 700;
+}
+
+button {
+    font-family: var(--font-header);
 }
 
 .hidden {
     display: none !important;
 }
 
-/* ========== login page ========== */
-.login-body {
-    background: url('/static/bgImage.png') no-repeat center center / cover;
+/* Scrollbar styling for that scroll feel */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #d7ccc8;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #bcaaa4;
+}
+
+/* ========== APP LAYOUT ========== */
+.app-root {
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    padding-left: 750px;
-    min-height: 100vh;
-    margin: 0;
+    height: 100%;
 }
 
-.login-title {
-    font-family: 'MyFont', serif;
-    font-size: 70px;
-    color: #3b2f2f;
-    width: 420px;
-    text-align: center;
-    margin-bottom: 15px;
-    margin-top: -100px;
-}
-
-.login-container {
-    background: rgba(255, 255, 255, 0.75);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    color: #333;
-    border-radius: 16px;
-    padding: 22px;
-    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.25);
-    width: 360px;
-}
-
-.login-form label {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 316px;
-    margin: 0 auto 20px auto;
-    font-family: 'MyFont', serif;
-    font-size: 22px;
-}
-
-.login-form input {
-    width: 210px;
-    padding: 12px 14px;
-    border: 1px solid #ddd;
-    border-radius: 12px;
-    background: rgba(255, 255, 255, 0.95);
+.app-main {
+    flex: 1;
+    overflow-y: auto;
+    padding-bottom: 70px;
+    /* Space for bottom nav */
+    position: relative;
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
     box-sizing: border-box;
 }
 
-.primary-btn {
-    width: 316px;
-    margin: 5px 22px;
-    padding: 5px;
-    background: #d8a87b;
-    border-radius: 14px;
-    color: #fff;
-    font-weight: 600;
-    border: none;
-    cursor: pointer;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
-    font-family: 'MyFont', serif;
-    font-size: 20px;
-    transition: 0.25s ease;
+.page-section {
+    padding: 20px;
+    height: 100%;
+    box-sizing: border-box;
+    animation: fadeIn 0.5s ease;
 }
 
-.primary-btn:hover {
-    background: #c8966f;
-    transform: scale(1.05);
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-.error-msg {
-    background: #b91c1c;
-    padding: 8px 10px;
-    border-radius: 8px;
-    font-size: 13px;
-    margin-bottom: 10px;
-    color: white;
-    text-align: center;
+/* ========== HEADER ========== */
+.app-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 30px;
+    background: linear-gradient(to bottom, #fdfaf5, #f0e6d2);
+    border-bottom: 2px solid var(--border-ink);
+    box-shadow: 0 2px 10px rgba(44, 24, 16, 0.1);
+    z-index: 10;
 }
 
-.hint {
-    font-size: 12px;
-    margin: 5px 35px;
-    color: #9ca3af;
-    text-align: center;
-}
-
-/* ========== title/header ========== */
 .app-title {
-    font-family: 'MyFont', serif;
-    font-size: 40px;
-    font-weight: 600;
-    color: #3b2f2f;
-    margin-top: 10px;
-    text-align: center;
+    font-family: var(--font-title);
+    font-size: 32px;
+    color: var(--text-ink);
+    text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.5);
     flex: 1;
 }
 
 .user-row {
-    margin-left: 140px;
+    font-family: var(--font-header);
+    color: var(--text-dim);
 }
 
 .app-user {
-    font-family: 'Font2', sans-serif;
-    font-size: 40px;
-}
-
-#section-chat #start-conversation-btn {
-    position: absolute;
-    top: 65px;
-    left: 300px;
-    font-family: 'MyFont', sans-serif;
-    font-size: 22px;
-    font-weight: 500;
-    padding: 8px 16px;
-    border-radius: 10px;
-    background: #f3e9dd;
-    border: none;
-    cursor: pointer;
-    transition: 0.25s ease;
-}
-
-#section-chat #start-conversation-btn:hover {
-    transform: scale(1.08);
-    background: #e8d9c7;
-}
-
-/* ========== nav bar ========== */
-.bottom-nav {
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 56px;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    background-color: #cdc9c4;
-    border-top: none;
-}
-
-.bottom-nav .nav-btn {
-    flex: 1;
-    height: 100%;
-    border: none;
-    cursor: pointer;
-    background: transparent;
-    font-family: 'MyFont', sans-serif;
-    font-size: 30px;
-    font-weight: 400;
-    color: black;
-    transition: 0.25s ease;
-}
-
-.bottom-nav .nav-btn.active {
-    background: rgba(255, 255, 255, 0.25);
-    font-weight: 600;
-}
-
-.bottom-nav .nav-btn:hover {
-    background: #2d3648;
-    color: white;
-    transform: scale(1.05);
-}
-
-/* ========== Chat page ========== */
-.chat-layout {
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    gap: 40px;
-    margin-top: 30px;
-    margin-left: 20px;
-}
-
-.chat-left,
-.chat-right {
-    background: white;
-    border-radius: 16px;
-    padding: 25px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
-    height: 480px;
-    box-sizing: border-box;
-    overflow-y: auto;
-}
-
-.chat-left {
-    font-family: 'Font2', sans-serif;
-    font-size: 30px;
-    line-height: 1.3;
-    width: 1200px;
-}
-
-.chat-right {
-    width: 600px;
-}
-
-.chat-left h3 {
-    font-family: 'MyFont', sans-serif;
-    font-size: 30px;
-    margin-top: 0;
-    margin-bottom: 20px;
-    line-height: 1;
-}
-
-.chat-right h4 {
-    font-family: 'MyFont', sans-serif;
-    font-size: 30px;
-    margin-top: 0;
-    margin-bottom: 20px;
-    line-height: 1;
-}
-
-.chat-left.normal-width {
-    width: 600px;
-}
-
-/* ========== conversation ========== */
-.conversation-box {
-    margin-top: 10px;
-    padding: 8px;
-    height: 260px;
-    overflow-y: auto;
-    background: #fafafa;
-    border-radius: 6px;
-    border: 1px solid #e1e1e1;
-}
-
-.msg {
-    padding: 8px 12px;
-    margin-bottom: 8px;
-    border-radius: 12px;
-    font-size: 24px;
-    max-width: 70%;
-    clear: both;
-}
-
-.msg.user {
-    background: #e0f2fe;
-    float: right;
-    margin-left: auto;
-}
-
-.msg.ai {
-    background: #f3e8ff;
-    float: left;
-    margin-right: auto;
-}
-
-/* ========== recording button ========== */
-.record-controls {
-    margin-top: 10px;
-}
-
-.record-controls button {
-    font-family: 'MyFont', sans-serif;
-    font-size: 20px;
-    font-weight: 500;
-    padding: 6px 14px;
-    margin-right: 8px;
-    border-radius: 8px;
-    background: #eee;
-    border: 1px solid #bbb;
-    cursor: pointer;
-    transition: 0.25s ease;
-}
-
-.record-controls button:not([disabled]):hover {
-    transform: scale(1.1);
-    background: #ddd;
-}
-
-.record-controls button[disabled] {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-#conversation-status {
-    font-size: 24px;
-    font-weight: 600;
-    margin-top: 12px;
-    color: #6b7280;
-}
-
-/* ========== preview diary ========== */
-.diary-preview h5,
-.diary-preview p {
-    margin: 0 0 6px 0;
-    line-height: 1.1;
-}
-
-#diary-title-chat {
-    font-family: 'Font2', sans-serif;
-    font-size: 40px;
-    text-align: center;
-}
-
-#diary-date-chat,
-#diary-mood-chat {
-    font-family: 'Font2', sans-serif;
-    color: #6b7280;
-    font-size: 35px;
-    text-align: right;
-}
-
-#diary-content-chat {
-    font-family: 'Font2', sans-serif;
-    font-size: 35px;
-    white-space: pre-wrap;
-}
-
-/* ========== My Diaries page ========== */
-.diary-search {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 16px;
-}
-
-.diary-search input {
-    flex: 1;
-    padding: 10px 14px;
-    border: 1px solid #d8cfc2;
-    border-radius: 10px;
     font-size: 18px;
-    background: rgba(255, 255, 255, 0.85);
-    transition: border 0.2s ease;
+    font-weight: bold;
+    border-bottom: 1px solid var(--color-accent);
+    padding-bottom: 2px;
 }
 
-.diary-search input:focus {
-    border: 1px solid #bfa48a;
-    outline: none;
-}
 
-.diary-layout {
-    display: grid;
-    grid-template-columns: 1fr 2fr;
-    gap: 20px;
-    height: 420px;
-    overflow-y: auto;
-}
-
-#diary-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    max-height: 500px;
-    background: white;
-    border-radius: 12px;
-    padding: 16px;
-    overflow-y: auto;
-    font-family: 'MyFont', serif;
-    font-size: 20px;
-}
-
-#diary-list li {
-    padding: 12px;
-    cursor: pointer;
-    border-radius: 8px;
-    margin-bottom: 8px;
-    transition: background 0.2s ease;
-    font-family: 'MyFont', serif;
-    font-size: 20px;
-}
-
-#diary-list li:hover {
-    background: #f1f5f9;
-}
-
-.diary-date-header {
-    font-family: serif !important;
-    margin-top: 12px;
-    font-weight: 600;
-    font-size: 16px;
-    color: #7a7a7a;
-}
-
-.diary-item {
-    padding: 6px 0 6px 16px;
-    cursor: pointer;
-    font-size: 14px;
-}
-
-/* ========== diary details ========== */
-.diary-detail {
-    background: white;
-    border-radius: 12px;
-    padding: 24px;
-    display: flex;
-    flex-direction: column;
-    max-height: 600px;
-    overflow-y: auto;
-}
-
-#diary-title {
-    font-family: 'Font2', sans-serif;
-    font-size: 28px;
-    text-align: center;
-    margin: 0 0 12px 0;
-}
-
-#diary-date,
-#diary-time,
-#diary-mood {
-    font-family: 'Font2', sans-serif;
-    font-size: 20px;
-    text-align: right;
-    color: #6b7280;
-    margin: 4px 0;
-}
-
-#diary-content {
-    font-family: 'Font2', sans-serif;
-    font-size: 24px;
-    flex: 1;
-    overflow-y: auto;
-    margin: 16px 0;
-    white-space: pre-wrap;
-    line-height: 1.6;
-}
-
-.diary-actions {
-    display: flex;
-    gap: 12px;
-    padding-top: 12px;
-    border-top: 1px solid #e5e7eb;
-}
-
-.diary-actions button {
-    padding: 8px 16px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    background: white;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.diary-actions button:hover {
-    background: #f3f4f6;
-}
-
-#section-diaries h3 {
-    font-family: 'MyFont', serif;
-    font-size: 30px;
-    text-align: center;
-    margin-top: 0px;
-    margin-bottom: 10px;
-}
-
-#section-diaries {
-    overflow: hidden;
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 20px 0;
-    margin-top: -40px !important;
-}
-
-#section-diaries button {
-    font-family: 'MyFont', serif;
-    font-size: 20px;
-    padding: 8px 20px;
-    border-radius: 12px;
-    background: #f3e9dd;
-    border: none;
-    cursor: pointer;
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
-    transition: 0.25s ease;
-}
-
-#section-diaries button:hover {
-    background: #e8d8c7;
-    transform: scale(1.05);
-}
-
-#section-diaries button:active {
-    transform: scale(0.97);
-}
-
-/* ========== setting page ========== */
-#section-settings {
-    background: white;
-    border-radius: 12px;
-    padding: 24px;
-    max-width: 600px;
-    margin: 0 auto;
-}
-
-#section-settings h3 {
-    font-family: 'MyFont', sans-serif;
-    font-size: 28px;
-    margin-top: 0;
-}
-
-#section-settings button {
-    font-family: 'MyFont', serif;
-    font-size: 20px;
-    padding: 10px 24px;
-    border-radius: 12px;
-    background: #f3e9dd;
-    border: none;
-    color: #3b2f2f;
-    cursor: pointer;
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
-    transition: 0.25s ease;
-}
-
-#section-settings button:hover {
-    background: #e8d8c7;
-    transform: scale(1.05);
-}
-
-#section-settings button:active {
-    transform: scale(0.97);
-}
-
-#section-settings p {
-    font-family: 'MyFont', serif;
-    font-size: 20px;
-    color: #3b2f2f;
-}
-
-/* ========== Diary Settings modal ========== */
-.modal {
-    position: fixed;
-    inset: 0;
-    display: flex;
+/* ========== LOGIN PAGE ========== */
+.login-body {
+    background: url('/static/bgImage.png') no-repeat center center / cover;
+    /* Fallback if image missing */
+    background-color: var(--text-ink);
+    align-items: center;
     justify-content: center;
-    align-items: center;
-    background: rgba(0, 0, 0, 0.35);
-    z-index: 50;
 }
 
-.modal-content {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-radius: 18px;
-    padding: 20px 24px;
-    min-width: 520px;
-    max-width: 720px;
-    max-height: 80vh;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
-    display: flex;
-    flex-direction: column;
-    box-sizing: border-box;
-    font-family: 'Font2', sans-serif;
+.login-title {
+    font-family: var(--font-title);
+    font-size: 72px;
+    color: #fdfaf5;
+    /* Light text on likely dark bg image */
+    text-shadow: 2px 4px 8px rgba(0, 0, 0, 0.6);
+    margin-bottom: 40px;
+    margin-top: 0;
+    /* Reset */
+    width: auto;
 }
 
-.modal-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 12px;
-}
-
-.modal-header h3 {
-    font-family: 'MyFont', serif;
-    font-size: 28px;
-    margin: 0;
-    color: #3b2f2f;
-}
-
-.close-btn {
-    border: none;
-    background: transparent;
-    font-size: 28px;
-    cursor: pointer;
-    line-height: 1;
-    padding: 4px 8px;
-    border-radius: 999px;
-    transition: 0.2s ease;
-}
-
-.close-btn:hover {
-    background: #f3e9dd;
-}
-
-.modal-body {
-    overflow-y: auto;
-    padding-right: 4px;
-    margin-bottom: 12px;
-}
-
-.preference-group {
-    margin-bottom: 16px;
-}
-
-.preference-group label {
-    display: block;
-    font-family: 'MyFont', serif;
-    font-size: 20px;
-    margin-bottom: 6px;
-    color: #3b2f2f;
-}
-
-#diary-theme,
-#diary-style,
-#custom-instructions {
+.login-container {
+    background: var(--bg-paper);
+    padding: 40px;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-deep), inset 0 0 40px rgba(139, 69, 19, 0.1);
+    border: 1px solid var(--border-ink);
     width: 100%;
-    box-sizing: border-box;
-    border-radius: 10px;
-    border: 1px solid #d8cfc2;
-    padding: 10px 12px;
-    font-size: 16px;
-    font-family: 'Font2', sans-serif;
-    background: rgba(255, 255, 255, 0.95);
-    outline: none;
-    transition: border 0.2s ease, box-shadow 0.2s ease;
-}
-
-#diary-theme:focus,
-#diary-style:focus,
-#custom-instructions:focus {
-    border-color: #bfa48a;
-    box-shadow: 0 0 0 2px rgba(191, 164, 138, 0.2);
-}
-
-#custom-instructions {
-    resize: vertical;
-}
-
-/* 文本 + 语音按钮一行 */
-.custom-input-container {
+    max-width: 400px;
     position: relative;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
 }
 
-.voice-input-controls {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 14px;
-    color: #6b7280;
-}
-
-.voice-btn {
-    border: none;
-    border-radius: 999px;
-    padding: 6px 10px;
-    background: #f3e9dd;
-    cursor: pointer;
-    font-size: 16px;
-    transition: 0.2s ease;
-}
-
-.voice-btn:hover {
-    background: #e8d8c7;
-    transform: scale(1.05);
-}
-
-#voice-input-status {
-    font-family: 'Font2', sans-serif;
-}
-
-.template-buttons {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
-}
-
-.template-btn {
-    border: none;
+/* Ornamental corners for login */
+.login-container::before {
+    content: '';
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    right: 6px;
+    bottom: 6px;
+    border: 2px solid var(--color-accent);
     border-radius: 12px;
-    padding: 8px 10px;
-    background: #f9f5ee;
-    font-family: 'Font2', sans-serif;
+    pointer-events: none;
+}
+
+.login-form label {
+    display: block;
+    font-family: var(--font-header);
+    color: var(--text-ink);
+    margin-bottom: 8px;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.login-form input {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 24px;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid var(--border-ink);
+    font-family: var(--font-body);
+    font-size: 18px;
+    color: var(--text-ink);
+    box-sizing: border-box;
+    transition: 0.3s;
+}
+
+.login-form input:focus {
+    outline: none;
+    border-bottom-color: var(--color-primary);
+    background: rgba(139, 69, 19, 0.05);
+}
+
+.hint {
     font-size: 14px;
-    text-align: left;
+    color: var(--text-dim);
+    text-align: center;
+    font-style: italic;
+    margin-top: 20px;
+}
+
+.error-msg {
+    background: var(--color-danger);
+    color: white;
+    padding: 10px;
+    border-radius: var(--radius-sm);
+    text-align: center;
+    margin-bottom: 20px;
+    font-family: var(--font-header);
+}
+
+/* ========== BUTTONS ========== */
+.primary-btn {
+    display: block;
+    width: 100%;
+    background: var(--color-primary);
+    color: white;
+    border: 2px solid var(--color-primary);
+    padding: 12px;
+    font-size: 18px;
+    font-weight: bold;
+    border-radius: var(--radius-md);
     cursor: pointer;
-    transition: 0.2s ease;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 0 #5d2e0b;
+    /* 3D effect */
+    transition: all 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
-.template-btn:hover {
-    background: #f3e9dd;
-    transform: translateY(-1px);
+.primary-btn:hover {
+    background: var(--color-primary-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 0 #5d2e0b;
 }
 
-.modal-footer {
-    margin-top: 8px;
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
+.primary-btn:active {
+    transform: translateY(2px);
+    box-shadow: 0 0 0 #5d2e0b;
 }
 
 .secondary-btn {
-    font-family: 'MyFont', serif;
-    font-size: 18px;
-    padding: 8px 18px;
-    border-radius: 12px;
-    border: 1px solid #d8cfc2;
-    background: white;
-    color: #3b2f2f;
+    background: transparent;
+    border: 2px solid var(--border-ink);
+    color: var(--text-ink);
+    font-family: var(--font-header);
+    font-weight: bold;
+    padding: 8px 16px;
+    border-radius: var(--radius-md);
     cursor: pointer;
-    transition: 0.2s ease;
+    transition: 0.2s;
 }
 
 .secondary-btn:hover {
-    background: #f3f4f6;
-}
-
-.modal-footer .primary-btn {
-    width: auto;
-    min-width: 170px;
-    margin: 0;
-    padding: 8px 20px;
-    font-size: 18px;
+    background: rgba(139, 69, 19, 0.1);
+    color: var(--color-primary);
+    border-color: var(--color-primary);
 }
 
 
+/* ========== CHAT SECTION ========== */
+#section-chat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
 
-/* ========== Edit Panel Styles ========== */
-.chat-right h4 {
-    font-family: 'MyFont', sans-serif;
-    font-size: 28px;
-    margin-top: 0;
+#start-conversation-btn {
+    margin: 20px auto;
+    font-size: 20px;
+    padding: 12px 30px;
+    background: var(--bg-paper);
+    border: 2px solid var(--color-accent);
+    color: var(--text-ink);
+    border-radius: 30px;
+    box-shadow: var(--shadow-paper);
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+#start-conversation-btn:hover {
+    background: white;
+    transform: scale(1.05);
+}
+
+.chat-layout {
+    display: flex;
+    width: 100%;
+    max-width: 1200px;
+    gap: 30px;
+    height: calc(100vh - 200px);
+    /* Fill remaining space */
+}
+
+/* Common container style */
+.chat-left,
+.chat-right {
+    background: var(--bg-paper);
+    padding: 25px;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-paper);
+    border: 1px solid #dcdcdc;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+/* Make them look like pages */
+.chat-left::before,
+.chat-right::before {
+    content: '';
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    right: 5px;
+    bottom: 5px;
+    border: 1px solid rgba(139, 69, 19, 0.2);
+    border-radius: 12px;
+    pointer-events: none;
+}
+
+.chat-left {
+    flex: 2;
+}
+
+.chat-left.full-width {
+    flex: 1;
+    /* Center it when alone */
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.chat-right {
+    flex: 1.2;
+    border-left: 4px double var(--border-ink);
+    /* Separator look */
+}
+
+.conversation-box {
+    flex: 1;
+    overflow-y: auto;
+    margin: 15px 0;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: var(--radius-md);
+    border: 1px inset rgba(0, 0, 0, 0.05);
+}
+
+.msg {
     margin-bottom: 16px;
-    text-align: center;
+    padding: 12px 18px;
+    border-radius: 18px;
+    max-width: 80%;
+    font-size: 18px;
+    line-height: 1.5;
+    position: relative;
 }
 
+.msg.ai {
+    background: #e6e0d4;
+    /* Darker parchment */
+    color: var(--text-ink);
+    align-self: flex-start;
+    border-bottom-left-radius: 2px;
+    border: 1px solid #d7ccc8;
+}
+
+.msg.user {
+    background: #3e2723;
+    /* Dark leather color */
+    color: #efebe9;
+    margin-left: auto;
+    border-bottom-right-radius: 2px;
+}
+
+/* Controls */
+.record-controls {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    padding-top: 10px;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.record-controls button {
+    border: none;
+    background: transparent;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: var(--radius-md);
+    background: #efebe9;
+    color: var(--text-ink);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: 0.2s;
+}
+
+.record-controls button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.record-controls button:not(:disabled):hover {
+    background: #d7ccc8;
+    transform: translateY(-1px);
+}
+
+#finish-conversation-btn {
+    background-color: var(--color-primary);
+    color: white;
+}
+
+#finish-conversation-btn:not(:disabled):hover {
+    background-color: var(--color-primary-hover);
+}
+
+.status-text {
+    text-align: center;
+    font-style: italic;
+    color: var(--text-dim);
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+/* ========== EDIT PANEL ========== */
 .edit-group {
-    margin-bottom: 14px;
+    margin-bottom: 15px;
 }
 
 .edit-group label {
     display: block;
-    font-family: 'MyFont', serif;
-    font-size: 16px;
-    margin-bottom: 4px;
-    color: #3b2f2f;
+    font-family: var(--font-header);
+    font-size: 14px;
+    color: var(--text-dim);
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .edit-input,
-.edit-select {
+.edit-select,
+.edit-textarea {
     width: 100%;
-    box-sizing: border-box;
-    border-radius: 8px;
-    border: 1px solid #d8cfc2;
-    padding: 10px 12px;
-    font-size: 15px;
-    font-family: 'Font2', sans-serif;
-    background: rgba(255, 255, 255, 0.95);
-    outline: none;
-    transition: border 0.2s ease;
-}
-
-.edit-input:focus,
-.edit-select:focus,
-.edit-textarea:focus {
-    border-color: #bfa48a;
+    background: white;
+    border: 1px solid #d7ccc8;
+    border-radius: var(--radius-sm);
+    padding: 10px;
+    font-family: var(--font-body);
+    font-size: 16px;
+    color: var(--text-ink);
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .edit-textarea {
-    width: 100%;
-    box-sizing: border-box;
-    border-radius: 8px;
-    border: 1px solid #d8cfc2;
-    padding: 10px 12px;
-    font-size: 15px;
-    font-family: 'Font2', sans-serif;
-    background: rgba(255, 255, 255, 0.95);
-    outline: none;
     resize: vertical;
-    min-height: 120px;
-}
-
-.regenerate-section {
-    margin-top: 16px;
-    padding: 12px;
-    background: #faf8f5;
-    border: 1px dashed #d8cfc2;
-    border-radius: 10px;
-}
-
-.regenerate-section label {
-    display: block;
-    font-family: 'MyFont', serif;
-    font-size: 14px;
-    margin-bottom: 6px;
-    color: #6b7280;
-}
-
-.regenerate-section .edit-input {
-    margin-bottom: 8px;
-}
-
-.regenerate-section .secondary-btn {
-    width: 100%;
+    min-height: 150px;
+    line-height: 1.6;
 }
 
 .diary-edit-actions {
-    margin-top: 16px;
     display: flex;
-    justify-content: space-between;
-    gap: 12px;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
 }
 
-.diary-edit-actions .secondary-btn {
-    flex: 1;
+.regenerate-section {
+    background: rgba(204, 164, 59, 0.1);
+    /* Gold tint */
+    padding: 15px;
+    border-radius: var(--radius-md);
+    margin-top: 20px;
+    border: 1px dashed var(--color-accent);
 }
 
-.diary-edit-actions .primary-btn {
-    flex: 2;
-    margin: 0;
-    width: auto;
-}
 
-/* ========== Calendar Styles ========== */
+/* ========== DIARY LIST & CALENDAR ========== */
 .calendar-container {
-    background: white;
-    border-radius: 12px;
-    padding: 16px;
-    margin-bottom: 16px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    background: var(--bg-paper);
+    padding: 20px;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-paper);
+    margin-bottom: 20px;
+    border: 1px solid #dcdcdc;
 }
 
 .calendar-nav {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    justify-content: center;
-    gap: 12px;
-    margin-bottom: 12px;
-}
-
-.calendar-nav button {
-    font-family: 'MyFont', serif;
-    font-size: 16px;
-    padding: 6px 14px;
-    border-radius: 8px;
-    background: #f3e9dd;
-    border: none;
-    cursor: pointer;
-    transition: 0.2s ease;
-}
-
-.calendar-nav button:hover {
-    background: #e8d8c7;
-    transform: scale(1.05);
+    margin-bottom: 15px;
 }
 
 #calendar-title {
-    font-family: 'Font2', serif;
-    font-size: 22px;
-    font-weight: 600;
-    color: #3b2f2f;
-    min-width: 180px;
-    text-align: center;
+    font-family: var(--font-header);
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.calendar-nav button {
+    background: transparent;
+    border: 1px solid var(--border-ink);
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+#today-btn {
+    border-radius: 20px;
+    width: auto;
+    padding: 0 15px;
 }
 
 .calendar-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: 4px;
+    gap: 8px;
+    margin-top: 10px;
 }
 
 .calendar-header {
     text-align: center;
-    font-family: 'Font2', serif;
+    font-family: var(--font-header);
+    font-weight: bold;
+    color: var(--text-dim);
     font-size: 14px;
-    font-weight: 600;
-    color: #6b7280;
-    padding: 8px 0;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #e0e0e0;
 }
 
 .calendar-day {
-    position: relative;
-    text-align: center;
-    padding: 10px 4px;
-    border-radius: 8px;
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
     cursor: pointer;
-    font-family: 'Font2', sans-serif;
-    font-size: 15px;
-    transition: 0.2s ease;
-    background: #fafafa;
+    font-family: var(--font-body);
+    background: white;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    /* Card-like */
+    transition: 0.2s;
+    position: relative;
+    border: 1px solid transparent;
 }
 
-.calendar-day:hover:not(.empty) {
-    background: #f0ebe5;
-    transform: scale(1.05);
+.calendar-day:hover {
+    background: #efebe9;
+    transform: translateY(-2px);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+}
+
+.calendar-day.today {
+    border: 2px solid var(--color-accent);
+    font-weight: bold;
+}
+
+.calendar-day.selected {
+    background: var(--color-primary);
+    color: white;
+    border-color: var(--color-primary);
+}
+
+.calendar-day.has-diary::after {
+    content: '';
+    width: 6px;
+    height: 6px;
+    background: var(--text-dim);
+    border-radius: 50%;
+    margin-top: 2px;
+}
+
+.calendar-day.mood-positive::after {
+    background: #2e7d32;
+    /* Green ink */
+}
+
+.calendar-day.mood-negative::after {
+    background: #c62828;
+    /* Red ink */
 }
 
 .calendar-day.empty {
     background: transparent;
     cursor: default;
-}
-
-.calendar-day.today {
-    border: 2px solid #d8a87b;
-    font-weight: 600;
-}
-
-.calendar-day.has-diary {
-    background: #e8f5e9;
-    font-weight: 600;
-}
-
-.calendar-day.mood-positive {
-    background: #c8e6c9;
-}
-
-.calendar-day.mood-negative {
-    background: #ffcdd2;
-}
-
-.calendar-day.selected {
-    background: #d8a87b !important;
-    color: white;
+    box-shadow: none;
 }
 
 .diary-count-badge {
     position: absolute;
-    top: 2px;
-    right: 2px;
-    background: #d8a87b;
+    top: -4px;
+    right: -4px;
+    background: var(--color-accent);
     color: white;
     font-size: 10px;
     width: 16px;
@@ -954,70 +643,231 @@ body {
     justify-content: center;
 }
 
-/* Calendar diary list */
-.calendar-diary-section {
-    background: white;
-    border-radius: 12px;
-    padding: 12px 16px;
-    margin-bottom: 16px;
+
+.diary-layout {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 20px;
+    height: 500px;
 }
 
-.calendar-diary-section h4 {
-    font-family: 'MyFont', serif;
-    font-size: 18px;
-    margin: 0 0 8px 0;
-    color: #3b2f2f;
-}
-
-#calendar-diary-list {
+#diary-list {
     list-style: none;
     padding: 0;
     margin: 0;
-    max-height: 120px;
     overflow-y: auto;
+    background: var(--bg-paper);
+    border-radius: var(--radius-md);
+    border: 1px solid #dcdcdc;
 }
 
-#calendar-diary-list li {
-    padding: 8px 12px;
-    border-radius: 6px;
+#diary-list li {
+    padding: 15px;
+    border-bottom: 1px solid #efebe9;
     cursor: pointer;
-    font-family: 'Font2', sans-serif;
-    font-size: 14px;
-    transition: 0.2s ease;
+    transition: background 0.2s;
 }
 
-#calendar-diary-list li:hover {
-    background: #f3e9dd;
+#diary-list li:hover {
+    background: #efebe9;
 }
 
-#calendar-diary-list li.no-diary {
-    color: #9ca3af;
-    cursor: default;
+#diary-list li.selected {
+    background: rgba(139, 69, 19, 0.1);
+    border-left: 4px solid var(--color-primary);
 }
 
-#calendar-diary-list li.no-diary:hover {
+.diary-detail {
+    background: var(--bg-paper);
+    padding: 40px;
+    border-radius: var(--radius-lg);
+    border: 1px solid #dcdcdc;
+    box-shadow: var(--shadow-paper);
+    overflow-y: auto;
+    background-image: linear-gradient(#fdfaf5 2px, transparent 2px);
+    /* Lined paper effect */
+    background-size: 100% 32px;
+    line-height: 32px;
+}
+
+#diary-title {
+    font-family: var(--font-title);
+    font-size: 36px;
+    text-align: center;
+    margin-bottom: 10px;
+    color: var(--text-ink);
+    border-bottom: 2px solid var(--border-ink);
+    padding-bottom: 15px;
     background: transparent;
 }
 
-.section-divider {
+#diary-content {
+    font-size: 18px;
+    margin-top: 20px;
+}
+
+/* Search bar styling */
+.diary-search {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.diary-search input {
+    flex: 1;
+    padding: 10px;
+    border-radius: 20px;
+    border: 1px solid var(--border-ink);
+    background: rgba(255, 255, 255, 0.8);
+    font-family: var(--font-body);
+}
+
+
+/* ========== BOTTOM NAVIGATION ========== */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 70px;
+    background: #2d1b12;
+    /* Dark leather */
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+    z-index: 100;
+    border-top: 2px solid #5d4037;
+}
+
+.nav-btn {
+    background: transparent;
     border: none;
-    border-top: 1px solid #e5e7eb;
-    margin: 16px 0;
+    color: #a1887f;
+    font-family: var(--font-header);
+    font-size: 18px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: 0.3s;
+    position: relative;
+    overflow: hidden;
 }
 
-/* Diary detail date styles */
-.diary-entry-date {
-    font-family: 'Font2', sans-serif;
-    font-size: 22px;
-    color: #3b2f2f;
-    margin: 4px 0;
-    text-align: right;
+.nav-btn::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background: var(--color-accent);
+    transition: 0.3s;
+    transform: translateX(-50%);
 }
 
-.diary-created-info {
-    font-family: 'Font2', sans-serif;
+.nav-btn:hover {
+    color: #fdfaf5;
+}
+
+.nav-btn.active {
+    color: var(--color-accent);
+}
+
+.nav-btn.active::after {
+    width: 60%;
+}
+
+
+/* ========== MODAL ========== */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: var(--bg-paper);
+    width: 600px;
+    max-height: 85vh;
+    border-radius: var(--radius-lg);
+    border: 4px solid var(--text-ink);
+    padding: 30px;
+    box-shadow: var(--shadow-deep);
+    overflow-y: auto;
+    position: relative;
+}
+
+/* Corner decorations for modal */
+.modal-content::after {
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    border: 1px solid var(--color-accent);
+    border-radius: 8px;
+    pointer-events: none;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    border-bottom: 2px solid var(--border-ink);
+    padding-bottom: 10px;
+}
+
+.close-btn {
+    background: transparent;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: var(--text-ink);
+}
+
+.template-btn {
+    background: #efebe9;
+    border: 1px solid #d7ccc8;
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    text-align: left;
     font-size: 14px;
-    color: #9ca3af;
-    margin: 2px 0 12px 0;
-    text-align: right;
+    cursor: pointer;
+    transition: 0.2s;
+    display: block;
+    width: 100%;
+}
+
+.template-btn:hover {
+    background: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.template-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+/* ========== SETTINGS ========== */
+#section-settings {
+    max-width: 600px;
+    margin: 40px auto;
+    text-align: center;
+    background: var(--bg-paper);
+    padding: 40px;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-paper);
 }
