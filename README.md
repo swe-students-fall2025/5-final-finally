@@ -342,8 +342,8 @@ nano .env  # Add your GEMINI_API_KEY
 pipenv install --dev
 
 # Run development server
-pipenv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-# API docs available at http://localhost:8000/docs
+pipenv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8001
+# API docs available at http://localhost:8001/docs
 ```
 
 #### 3. Set Up MongoDB
