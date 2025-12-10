@@ -27,7 +27,7 @@ services:
       - mongo
       - ai-service
     ports:
-      - "80:5000"
+      - "127.0.0.1:5000:5000"
     environment:
       - MONGO_URI=mongodb://mongo:27017
       - AI_SERVICE_URL=http://ai-service:8000
